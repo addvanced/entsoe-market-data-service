@@ -2,6 +2,7 @@ plugins {
 	id 'org.springframework.boot' version '2.7.4'
 	id 'io.spring.dependency-management' version '1.0.14.RELEASE'
 	id 'org.openapi.generator' version '6.2.0'
+	id 'com.github.edeandrea.xjc-generation' version "1.6"
 	id 'io.freefair.lombok' version '6.5.1'
 	id 'java'
 }
@@ -25,6 +26,7 @@ jar.enabled = false
 ext {
 	set('springCloudVersion', "2021.0.3")
 	set('mapstructVersion', "1.5.2.Final")
+	set('jaxbVersion', '2.3.1')
 }
 dependencies {
 
@@ -50,6 +52,21 @@ dependencies {
 	implementation('org.springdoc:springdoc-openapi-common:1.6.11')
 	implementation('org.openapitools:jackson-databind-nullable:0.2.3')
 	implementation('com.google.code.findbugs:jsr305:3.0.2')
+
+	// JSON/XML
+	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.0-rc1'
+	implementation 'com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.13.4'
+
+	// ENTSO-E XML
+	implementation 'javax.activation:activation:1.1.1'
+	implementation "javax.xml.bind:jaxb-api:${jaxbVersion}"
+
+	xjc "javax.xml.bind:jaxb-api:${jaxbVersion}"
+	xjc "com.sun.xml.bind:jaxb-xjc:${jaxbVersion}"
+	xjc "com.sun.xml.bind:jaxb-impl:${jaxbVersion}"
+	xjc 'com.sun.istack:istack-commons-runtime:4.1.1'
+
 
 	// Mapstruct
 	compileOnly "org.mapstruct:mapstruct:${mapstructVersion}"
@@ -98,6 +115,19 @@ openApiGenerate {
 	outputDir.set("$buildDir/generated")
 
 	globalProperties.set( [models: "", apis: "", supportingFiles: "ApiUtil.java"] )
+}
+
+xjcGeneration {
+	defaultAdditionalXjcOptions = ['encoding': 'UTF-8']
+
+	schemas {
+		EntsoeIEC62325 {
+			schemaRootDir = "$projectDir/src/main/resources/entsoe/xsd"
+			schemaFile = "iec62325-451-3-publication_v7_0.xsd"
+			javaPackageName = 'com.systemedz.entsoe.xsd.iec62325'
+			generatedOutputRootDir = file "$buildDir/generated"
+		}
+	}
 }
 
 compileJava {

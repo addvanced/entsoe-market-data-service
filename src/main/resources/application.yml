@@ -11,13 +11,22 @@ spring:
       fail-on-reading-dup-tree-key: true
 
 server:
-  port: 8080
+  port: 443
   compression:
     enabled: true
     min-response-size: 4096
   error:
     whitelabel:
       enabled: false
+  ssl:
+    key-store: classpath:entsoe.p12
+    key-store-password: password
+    key-store-type: pkcs12
+    key-alias: entsoe
+    key-password: password
+
+entsoe:
+  baseurl: "https://transparency.entsoe.eu/api"
 
 management:
   server:
