@@ -1,0 +1,24 @@
+library: "spring-boot"
+
+apiPackage: "dk.systemedz.entsoe.marketdataservice.api.rest"
+useTags: true
+
+modelPackage: "dk.systemedz.entsoe.marketdataservice.api.dto"
+modelNameSuffix: Dto
+serializableModel: true
+
+delegatePattern: true
+
+generateModelTests: false
+generateModelDocumentation: false
+
+useBeanValidation: true
+performBeanValidation: true
+
+hideGenerationTimestamp: true
+openApiNullable: false
+useOptional: false
+
+disallowAdditionalPropertiesIfNotPresent: false
+unhandledException: true
+booleanGetterPrefix: is

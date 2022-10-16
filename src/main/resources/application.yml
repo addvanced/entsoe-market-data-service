@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: entsoe-market-data-service
+  main:
+    lazy-initialization: true
+    banner-mode: off
+  jackson:
+    default-property-inclusion: always
+    deserialization:
+      fail-on-unknown-properties: false
+      fail-on-reading-dup-tree-key: true
+
+server:
+  port: 8080
+  compression:
+    enabled: true
+    min-response-size: 4096
+  error:
+    whitelabel:
+      enabled: false
+
+management:
+  server:
+    port: ${actuator.port:8081}
+  endpoint:
+    health:
+      show-details: always
+    loggers:
+      enabled: true
+    prometheus:
+      enabled: true
+  health:
+    db:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  level:
+    web: info
+    org:
+      springframework:
+        boot:
+          autoconfigure: error

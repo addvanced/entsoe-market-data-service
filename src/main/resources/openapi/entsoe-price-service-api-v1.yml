@@ -1,0 +1,341 @@
+openapi: 3.0.2
+info:
+  title: ENTSO-E - Price Service
+  version: 1.0.0
+  description: >-
+    ##  ENTSO-E Service
+    
+    
+    This service is made with ther purpose of simplifying the current API that is provided by  ENTSO-E,
+    and also converting the responses into JSON format instead of the current XML format provided by
+    ENTSO-E.
+    
+    
+    This API has been developed for Grønnere Elforbrug, by Kenneth Thomsen.
+  contact:
+    name: Kenneth Thomsen
+    url: 'https://elforbrug.nu'
+    email: kontakt@kthomsen.dk
+paths:
+  '/prices/{areaCode}':
+    summary: Fetch Document Data in specified time interval.
+    description: This endpoint will return a Market Document in the specified time interval.
+    get:
+      tags:
+        - PriceDataController
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricesResponse'
+          description: MarketDocument Response with data from provided interval.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+      operationId: getMarketDocumentFromInterval
+      summary: Fetch Document Data in specified time interval.
+      description: >-
+        There are multiple ways of specifying an interval. Here are a few examples:
+        
+        
+        ## Interval by intervalType examples
+        
+        __Interval: 1 year back from todays date *(Note: Limited to 1 year back in time. Use
+        date-interval, or year to get an interval for a year further back in time.)*__
+        
+        * /prices/FR?intervalType=year&interval=-1
+        
+        
+        __Interval: 50 days back from todays date__
+        
+        * /prices/FR?intervalType=day&interval=-50
+        
+        
+        __Interval: The following week__
+        
+        * /prices/FR?intervalType=week&interval=1
+        
+        
+        ## Interval by timestamps similar to ENTSO-E API
+        
+        __Interval: September 1st, 2022 at 00:00 to September 30th, 2022 at 23:00__
+        
+        * /prices/FR?from=20220901&to=20220930
+        
+        * /prices/FR?from=202209010000&to=202209302300
+        
+        
+        __Interval: September 1st, 2022 at 00:00 until todays date *(Max 1 year ago from todays
+        date)*__
+        
+        * /prices/FR?from=20220901
+        
+        
+        ## Interval by year/month/week/day
+        
+        __Interval: Month *(e.g 9 = September. If no year is specific, then of current year.)*__
+        
+        * /prices/FR?month=9
+        
+        
+        __Interval: September of year 2021*(if no year specific, then of current year)*__
+        
+        * /prices/FR?year=2021&month=9
+        
+        
+        __Interval: Week 36 of current year *(e.g. 2022 would be September 5th, 2022 at 00:00 to
+        September 11th, 2022 at 23:00)*__
+        
+        * /prices/FR?week=36
+        
+        
+        __Interval: All of 2021 *(if current year, then up until yesterdays date at 23:00)*__
+        
+        * /prices/FR?year=2021
+        
+        
+        __Interval: Week 36 of 2021 *(September 6th, 2021 at 00:00 to September 12th, 2021 at
+        23:00)*__
+        
+        * /prices/FR?year=2021&week=36
+    parameters:
+      -
+        name: areaCode
+        description: 'Area Code, e.g. DK1, DE or FR'
+        schema:
+          $ref: '#/components/schemas/AreaCode'
+        in: path
+        required: true
+      -
+        examples:
+          'September 1st, 2022 at 00:00':
+            value: '202209010000'
+          'September 1st, 2022 at 00:00 without time':
+            value: '20220901'
+        name: from
+        description: Date/Time of Interval Start
+        schema:
+          type: string
+        in: query
+      -
+        examples:
+          'September 30th, 2022 at 23:00':
+            value: '202209302300'
+          'September 30th, 2022 at 23:00 without time':
+            value: '20220930'
+        name: to
+        description: |-
+          Date/Time of Interval End.
+          __Required parameter: from__
+        schema:
+          type: string
+        in: query
+      -
+        examples:
+          Year:
+            value: '2022'
+        name: year
+        description: Year
+        schema:
+          type: integer
+        in: query
+      -
+        examples:
+          September:
+            value: '9'
+        name: month
+        description: Month
+        schema:
+          type: integer
+        in: query
+      -
+        examples:
+          Week Number:
+            value: '36'
+        name: week
+        description: Week number
+        schema:
+          type: integer
+        in: query
+      -
+        name: entsoe-security-token
+        description: Security Token from ENTSO-E.
+        schema:
+          type: string
+        in: header
+        required: true
+      -
+        name: intervalType
+        description: >-
+          This parameter is used in combination with "period", to dertermine the type og interval we
+          want to search for, e.g. week, month, day or year.
+        schema:
+          $ref: '#/components/schemas/IntervalType'
+        in: query
+      -
+        name: interval
+        description: >-
+          An interval defined by a number, in combination with an intervalType, e.g.
+          intervalType=week&interval=-1 refers to 1 week back from todays date. 
+          
+          __(Required paramter: intervalType)__
+        schema:
+          format: int32
+          type: integer
+        in: query
+components:
+  schemas:
+    ErrorMessage:
+      description: Error Message
+      type: object
+      properties:
+        message:
+          description: Error Message
+          type: string
+        details:
+          description: ''
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorMessageDetail'
+      x-class-extra-annotation: >-
+        @lombok.Builder
+        @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+    ErrorMessageDetail:
+      description: ''
+      type: object
+      properties:
+        field:
+          description: Field name
+          type: string
+        message:
+          description: Information regarding the field error.
+          type: string
+      x-class-extra-annotation: '@lombok.Builder'
+    IntervalType:
+      description: 'Interval Type ENUM to define the interval type we''re searching for, e.g. month or week.'
+      enum:
+        - YEAR
+        - MONTH
+        - WEEK
+        - DAY
+      type: string
+    AreaCode:
+      description: |-
+        Area Codes.
+        * FR = France _(10YFR-RTE------C)_
+        * DK1 = Denmark - West _(10YDK-1--------W)_
+        * DK2 = Denmark - East _(10YDK-2--------M)_
+        * DE = Germany _(10Y1001A1001A82H)_
+        * SE1 = Sweden 1 _(10Y1001A1001A44P)_
+        * SE2 = Sweden 2 _(10Y1001A1001A45N)_
+        * SE3 = Sweden 3 _(10Y1001A1001A46L)_
+        * SE4 = Sweden 4 _(10Y1001A1001A47J)_
+        * NO1 = Norway 1 _(10YNO-1--------2)_
+        * NO2 = Norway 2 _(10YNO-2--------T)_
+        * NO3 = Norway 3 _(10YNO-3--------J)_
+        * NO4 = Norway 4 _(10YNO-4--------9)_
+        * NO5 = Norway 5 _(10Y1001A1001A48H)_
+      enum:
+        - FR
+        - DK1
+        - DK2
+        - DE
+        - SE1
+        - SE2
+        - SW1
+        - SW2
+        - SW3
+        - SW4
+        - NO1
+        - NO2
+        - NO3
+        - NO4
+        - NO5
+        - FI
+      type: string
+    IntervalDay:
+      description: ''
+      type: object
+      properties:
+        date:
+          format: date
+          description: The start and end timestamp of the specific day of the period.
+          type: string
+        hourlyPrices:
+          description: Prices throughout the day.
+          type: array
+          items:
+            $ref: '#/components/schemas/PricePoint'
+      x-class-extra-annotation: '@lombok.Builder'
+    PricePoint:
+      description: ''
+      type: object
+      properties:
+        price:
+          format: double
+          description: ''
+          type: number
+        priceHour:
+          format: date-time
+          description: ''
+          type: string
+      x-class-extra-annotation: '@lombok.Builder'
+    TimeInterval:
+      description: ''
+      required: []
+      type: object
+      properties:
+        start:
+          format: date-time
+          description: ''
+          type: string
+        end:
+          format: date-time
+          description: ''
+          type: string
+      x-class-extra-annotation: '@lombok.Builder'
+    PricesResponse:
+      description: ''
+      required: []
+      type: object
+      properties:
+        period:
+          $ref: '#/components/schemas/TimeInterval'
+          description: ''
+        typeCode:
+          description: ''
+          type: string
+          example: A44
+        currency:
+          description: ''
+          type: string
+          example: EUR
+        priceMeasureUnit:
+          description: ''
+          type: string
+          example: MWH
+        periodDays:
+          description: ''
+          type: array
+          items:
+            $ref: '#/components/schemas/IntervalDay'
+      x-class-extra-annotation: '@lombok.Builder'
+  responses:
+    400BadRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+      description: Bad Request with more details
+    500InternalServerError:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+      description: ''
+tags:
+  -
+    name: PriceDataController
+    description: ''

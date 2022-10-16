@@ -1,7 +1,7 @@
 plugins {
 	id 'org.springframework.boot' version '2.7.4'
 	id 'io.spring.dependency-management' version '1.0.14.RELEASE'
-	id 'org.openapi.generator' version '6.0.1'
+	id 'org.openapi.generator' version '6.2.0'
 	id 'io.freefair.lombok' version '6.5.1'
 	id 'java'
 }
@@ -19,6 +19,8 @@ configurations {
 repositories {
 	mavenCentral()
 }
+
+jar.enabled = false
 
 ext {
 	set('springCloudVersion', "2021.0.3")
@@ -86,8 +88,22 @@ tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
 }
 
-compileJava {
-	options.annotationProcessorPath = configurations.annotationProcessor
+openApiGenerate {
+	generatorName.set("spring")
+
+	validateSpec.set(false)
+
+	inputSpec.set("$projectDir/src/main/resources/openapi/entsoe-price-service-api-v1.yml")
+	configFile.set("$projectDir/src/main/resources/openapi/entsoe-price-service-api-v1-config.yml")
+	outputDir.set("$buildDir/generated")
+
+	globalProperties.set( [models: "", apis: "", supportingFiles: "ApiUtil.java"] )
 }
 
+compileJava {
+	options.annotationProcessorPath = configurations.annotationProcessor
+	dependsOn tasks.openApiGenerate
+}
+
+sourceSets.main.java.srcDir "$buildDir/generated/src/main/java"
 lombok.setDisableConfig(true)
