@@ -1,6 +1,12 @@
 package dk.systemedz.entsoe.marketdataservice.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import dk.systemedz.entsoe.marketdataservice.infrastructure.EntsoeApiClient;
+import dk.systemedz.entsoe.marketdataservice.infrastructure.entity.PublicationMarketDocument;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
 
@@ -14,14 +20,37 @@ public class EntsoeService {
         this.entsoeApiClient = entsoeApiClient;
     }
 
-    public String getEntsoeData(Map<String,String> params) {
+    public PublicationMarketDocument getEntsoeData(Map<String,String> params) {
         if(!queryDataIsValid(params))
             throw new RuntimeException("URL Parameters are not valid.");
 
-        return hasEventDateDefinition(params) ? getDataByEventDate(params) : getDataByPeriod(params);
+        try {
+
+
+        String response = hasEventDateDefinition(params) ? getDataByEventDate(params) : getDataByPeriod(params);
+
+        JacksonXmlModule module = new JacksonXmlModule();
+        module.setDefaultUseWrapper(false);
+        XmlMapper xmlMapper = new XmlMapper(module);
+        xmlMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        xmlMapper.registerModule(new JaxbAnnotationModule());
+
+        PublicationMarketDocument document = xmlMapper.readValue(response, PublicationMarketDocument.class);
+        prepareDocument(document, params.get("in_Domain"));
+        return document;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public String getDataByEventDate(Map<String, String> params) {
+    private void prepareDocument(PublicationMarketDocument document, String areaCode) {
+        document.setArea(areaCode);
+        document.getTimeSeries()
+                .forEach(s -> s.getPeriod()
+                        .setPricePointHours());
+    }
+
+    private String getDataByEventDate(Map<String, String> params) {
         String eventDate = params.get("eventDate").trim().toLowerCase();
 
         if(Strings.isBlank(eventDate))
@@ -36,7 +65,7 @@ public class EntsoeService {
     }
 
 
-    public String getDataByPeriod(Map<String, String> params) {
+    private String getDataByPeriod(Map<String, String> params) {
         return entsoeApiClient.getByPeriodDefinition(params);
     }
 

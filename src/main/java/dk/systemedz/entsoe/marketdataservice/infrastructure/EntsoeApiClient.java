@@ -27,7 +27,7 @@ public class EntsoeApiClient {
     }
 
     public String getLastWeek(Map<String,String> params) {
-        var periodEnd = LocalDateTime.now(ZoneId.of("Europe/Copenhagen"));
+        var periodEnd = LocalDateTime.now(ZoneId.of("Europe/Copenhagen")).withHour(23).withMinute(0).withSecond(0).withNano(0);
         var periodStart = periodEnd.minusWeeks(1);
         addPeriodFromEventDateToParams(params, periodStart, periodEnd);
 

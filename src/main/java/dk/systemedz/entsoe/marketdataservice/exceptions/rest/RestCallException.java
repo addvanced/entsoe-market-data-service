@@ -23,6 +23,11 @@ public class RestCallException extends RuntimeException {
         this.httpStatus = httpStatus;
     }
 
+    public RestCallException(String message, HttpStatus httpStatus, Throwable ex) {
+        super(message,ex);
+        this.httpStatus = httpStatus;
+    }
+
     public RestCallException(String message, List<ErrorMessageDetailDto> details, HttpStatus httpStatus) {
         this(message, httpStatus);
         this.errorMessageDetails = details;

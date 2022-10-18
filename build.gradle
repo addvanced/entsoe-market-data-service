@@ -57,16 +57,11 @@ dependencies {
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.0-rc1'
 	implementation 'com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.13.4'
-
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.4'
 	// ENTSO-E XML
-	implementation 'javax.activation:activation:1.1.1'
-	implementation "javax.xml.bind:jaxb-api:${jaxbVersion}"
-
-	xjc "javax.xml.bind:jaxb-api:${jaxbVersion}"
-	xjc "com.sun.xml.bind:jaxb-xjc:${jaxbVersion}"
-	xjc "com.sun.xml.bind:jaxb-impl:${jaxbVersion}"
-	xjc 'com.sun.istack:istack-commons-runtime:4.1.1'
-
+	xjc "javax.xml.bind:jaxb-api:$jaxbVersion"
+	xjc "org.glassfish.jaxb:jaxb-runtime:$jaxbVersion"
+	xjc "org.glassfish.jaxb:jaxb-xjc:$jaxbVersion"
 
 	// Mapstruct
 	compileOnly "org.mapstruct:mapstruct:${mapstructVersion}"
@@ -118,13 +113,11 @@ openApiGenerate {
 }
 
 xjcGeneration {
-	defaultAdditionalXjcOptions = ['encoding': 'UTF-8']
-
 	schemas {
 		EntsoeIEC62325 {
 			schemaRootDir = "$projectDir/src/main/resources/entsoe/xsd"
 			schemaFile = "iec62325-451-3-publication_v7_0.xsd"
-			javaPackageName = 'com.systemedz.entsoe.xsd.iec62325'
+			javaPackageName = 'dk.systemedz.entsoe.domain.models.entsoe'
 			generatedOutputRootDir = file "$buildDir/generated"
 		}
 	}

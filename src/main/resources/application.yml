@@ -2,7 +2,7 @@ spring:
   application:
     name: entsoe-market-data-service
   main:
-    lazy-initialization: true
+    #lazy-initialization: true
     banner-mode: off
   jackson:
     default-property-inclusion: always
