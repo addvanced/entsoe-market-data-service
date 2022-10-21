@@ -12,7 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -24,6 +26,7 @@ import javax.validation.ConstraintViolationException;
 import javax.validation.ElementKind;
 import javax.validation.Path;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -37,7 +40,13 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler {
     public RestErrorHandler() { super(); }
 
     @Override
-    protected @NonNull ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    protected  ResponseEntity<Object> handleMissingPathVariable(MissingPathVariableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        String errorMessage = "URL Path Parameter '%s' is missing.".formatted(ex.getParameter());
+        return doHandleExceptionInternal(errorMessage, null, HttpStatus.BAD_REQUEST, ex, request, headers);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
 
         List<ErrorMessageDetailDto> validationErrors = ex.getBindingResult()
                 .getFieldErrors().stream()
@@ -51,6 +60,7 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected ResponseEntity<?> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex, WebRequest request) {
         Pair<String, String> fieldInformation = getRequiredTypeInfo(ex.getRequiredType());
 
@@ -63,8 +73,9 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected ResponseEntity<?> handleConstraintViolationException(ConstraintViolationException ex, HttpServletRequest request) {
-        try {
+        //try {
             Set<ConstraintViolation<?>> constraintViolations = ex.getConstraintViolations();
             String message = String.join(",", constraintViolations.stream().map(ConstraintViolation::getMessage).toList());
 
@@ -76,14 +87,24 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler {
                             .build())
                     .toList());
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
+        /*} catch (Exception e) {
             String message = String.join(",", List.of(ex.getMessage()));
             ErrorMessageDto errorResponse = createRestErrorResponse(message, HttpStatus.INTERNAL_SERVER_ERROR);
             return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        }*/
+    }
+
+    @ExceptionHandler(value = {
+            DateTimeParseException.class
+    })
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<Object> handleInternalServerErrors(RuntimeException ex, WebRequest request) {
+        log.error("An internal Error occurred.", ex);
+        return doHandleExceptionInternal("An Internal Error occurred. Developers has been notified.", null, HttpStatus.INTERNAL_SERVER_ERROR, ex, request, new HttpHeaders());
     }
 
     @Override
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected @NonNull ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         List<ErrorMessageDetailDto> details = new ArrayList<>();
         return doHandleExceptionInternal("Malformed JSON in Request Body", details, HttpStatus.BAD_REQUEST, ex, request, new HttpHeaders());
@@ -95,6 +116,7 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(UnsupportedOperationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Object> exceptionHandler(RuntimeException ex) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());

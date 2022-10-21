@@ -16,10 +16,35 @@ info:
     name: Kenneth Thomsen
     url: 'https://elforbrug.nu'
     email: kontakt@kthomsen.dk
+  license:
+    name: GNU GPLv3
+    url: 'https://www.gnu.org/licenses/gpl.txt'
+servers:
+  -
+    url: 'https://entsoe.systemedz.com/api/{version}'
+    description: Production environment - currently hosted by Systemedz (Kenneth Thomsen)
+    variables:
+      version:
+        enum:
+          - v1
+        default: v1
+        description: The API Version
+  -
+    url: 'https://localhost:8443/api/{version}'
+    description: Localhost Environment (for testing)
+    variables:
+      version:
+        enum:
+          - v1
+          - v2
+        default: v1
+        description: The API Version
 paths:
   '/prices/{areaCode}':
-    summary: Fetch Document Data in specified time interval.
-    description: This endpoint will return a Market Document in the specified time interval.
+    summary: Request Price Data from ENTSO-E
+    description: |-
+      This endpoint will return Price Data from ENTSO-E in a specified Time Interval.
+      This interval can be set in different ways (read documentation for endpoint).
     get:
       tags:
         - PriceDataController
@@ -29,13 +54,181 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PricesResponse'
+              examples:
+                Prices for France - 1 day in past:
+                  value:
+                    area: France
+                    areaCode: 10YFR-RTE------C
+                    timeInterval:
+                      start: '2022-10-18T22:00:00'
+                      end: '2022-10-20T22:00:00'
+                    intervalDays:
+                      -
+                        currentDateInterval:
+                          start: '2022-10-18T22:00:00'
+                          end: '2022-10-19T22:00:00'
+                        currency: EUR
+                        measureUnit: MWH
+                        hourPrices:
+                          -
+                            hour: '2022-10-18T22:00:00'
+                            price: 130.99
+                          -
+                            hour: '2022-10-18T23:00:00'
+                            price: 125.18
+                          -
+                            hour: '2022-10-19T00:00:00'
+                            price: 121.42
+                          -
+                            hour: '2022-10-19T01:00:00'
+                            price: 123.73
+                          -
+                            hour: '2022-10-19T02:00:00'
+                            price: 128.28
+                          -
+                            hour: '2022-10-19T03:00:00'
+                            price: 142.03
+                          -
+                            hour: '2022-10-19T04:00:00'
+                            price: 159.77
+                          -
+                            hour: '2022-10-19T05:00:00'
+                            price: 228.27
+                          -
+                            hour: '2022-10-19T06:00:00'
+                            price: 232.85
+                          -
+                            hour: '2022-10-19T07:00:00'
+                            price: 195.11
+                          -
+                            hour: '2022-10-19T08:00:00'
+                            price: 166.41
+                          -
+                            hour: '2022-10-19T09:00:00'
+                            price: 157.32
+                          -
+                            hour: '2022-10-19T10:00:00'
+                            price: 149.45
+                          -
+                            hour: '2022-10-19T11:00:00'
+                            price: 130.22
+                          -
+                            hour: '2022-10-19T12:00:00'
+                            price: 142.4
+                          -
+                            hour: '2022-10-19T13:00:00'
+                            price: 131.5
+                          -
+                            hour: '2022-10-19T14:00:00'
+                            price: 153.05
+                          -
+                            hour: '2022-10-19T15:00:00'
+                            price: 190.38
+                          -
+                            hour: '2022-10-19T16:00:00'
+                            price: 220.1
+                          -
+                            hour: '2022-10-19T17:00:00'
+                            price: 212.62
+                          -
+                            hour: '2022-10-19T18:00:00'
+                            price: 161.83
+                          -
+                            hour: '2022-10-19T19:00:00'
+                            price: 141.73
+                          -
+                            hour: '2022-10-19T20:00:00'
+                            price: 140.66
+                          -
+                            hour: '2022-10-19T21:00:00'
+                            price: 130.85
+                      -
+                        currentDateInterval:
+                          start: '2022-10-19T22:00:00'
+                          end: '2022-10-20T22:00:00'
+                        currency: EUR
+                        measureUnit: MWH
+                        hourPrices:
+                          -
+                            hour: '2022-10-19T22:00:00'
+                            price: 107.61
+                          -
+                            hour: '2022-10-19T23:00:00'
+                            price: 88.27
+                          -
+                            hour: '2022-10-20T00:00:00'
+                            price: 77.39
+                          -
+                            hour: '2022-10-20T01:00:00'
+                            price: 69.94
+                          -
+                            hour: '2022-10-20T02:00:00'
+                            price: 66.74
+                          -
+                            hour: '2022-10-20T03:00:00'
+                            price: 97
+                          -
+                            hour: '2022-10-20T04:00:00'
+                            price: 132.8
+                          -
+                            hour: '2022-10-20T05:00:00'
+                            price: 168.05
+                          -
+                            hour: '2022-10-20T06:00:00'
+                            price: 195.95
+                          -
+                            hour: '2022-10-20T07:00:00'
+                            price: 167.65
+                          -
+                            hour: '2022-10-20T08:00:00'
+                            price: 168.2
+                          -
+                            hour: '2022-10-20T09:00:00'
+                            price: 167.43
+                          -
+                            hour: '2022-10-20T10:00:00'
+                            price: 160.42
+                          -
+                            hour: '2022-10-20T11:00:00'
+                            price: 143.82
+                          -
+                            hour: '2022-10-20T12:00:00'
+                            price: 141.05
+                          -
+                            hour: '2022-10-20T13:00:00'
+                            price: 163.15
+                          -
+                            hour: '2022-10-20T14:00:00'
+                            price: 155.06
+                          -
+                            hour: '2022-10-20T15:00:00'
+                            price: 180.07
+                          -
+                            hour: '2022-10-20T16:00:00'
+                            price: 188.25
+                          -
+                            hour: '2022-10-20T17:00:00'
+                            price: 197.01
+                          -
+                            hour: '2022-10-20T18:00:00'
+                            price: 172.53
+                          -
+                            hour: '2022-10-20T19:00:00'
+                            price: 146.6
+                          -
+                            hour: '2022-10-20T20:00:00'
+                            price: 137.1
+                          -
+                            hour: '2022-10-20T21:00:00'
+                            price: 129.36
+                    createdDateTime: '2022-10-19T19:54:39.689533'
           description: MarketDocument Response with data from provided interval.
         '400':
           $ref: '#/components/responses/400BadRequest'
         '500':
           $ref: '#/components/responses/500InternalServerError'
       operationId: getMarketDocumentFromInterval
-      summary: Fetch Document Data in specified time interval.
+      summary: Fetch Price Data in specified time interval.
       description: >-
         There are multiple ways of specifying an interval. Here are a few examples:
         
@@ -64,13 +257,15 @@ paths:
         
         * /prices/FR?from=20220901&to=20220930
         
-        * /prices/FR?from=202209010000&to=202209302300
+        * /prices/FR?from=202209012300&to=202209302300
         
         
         __Interval: September 1st, 2022 at 00:00 until todays date *(Max 1 year ago from todays
         date)*__
         
         * /prices/FR?from=20220901
+        
+        * /prices/FR?from=202209012300
         
         
         ## Interval by year/month/week/day
@@ -102,8 +297,19 @@ paths:
         * /prices/FR?year=2021&week=36
     parameters:
       -
+        examples:
+          France:
+            value: '"FR"'
+          Sweden 1:
+            value: '"SW1"'
+          Norway 2:
+            value: '"NO2"'
+          Denmark 1:
+            value: '"DK1"'
         name: areaCode
-        description: 'Area Code, e.g. DK1, DE or FR'
+        description: >-
+          The Area Code represents the area of which the data comes from. This could be e.g. DK1
+          which equals Denmark (West), or FR which is France.
         schema:
           $ref: '#/components/schemas/AreaCode'
         in: path
@@ -161,7 +367,7 @@ paths:
         in: query
       -
         name: entsoe-security-token
-        description: Security Token from ENTSO-E.
+        description: Security Token provided by ENTSO-E.
         schema:
           type: string
         in: header
@@ -185,6 +391,689 @@ paths:
           format: int32
           type: integer
         in: query
+  '/prices/{areaCode}/by-interval/day/{interval}':
+    summary: Search Prices from ENTSO-E by a daily interval ahead of back in time.
+    description: >-
+      By providing an area code and interval, you can look up prices from ENTSO-E in the specified area
+      by a daily interval, just by specifying the interval as a number. This could be 50 days or -50
+      days from todays date.
+    get:
+      tags:
+        - PriceIntervalController
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricesResponse'
+          description: Return prices for the requested period.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+      operationId: getPricesByDailyInterval
+      summary: Get ENTSO-E Market Prices by a daily interval.
+      description: |-
+        ## Interval by intervalType: Day
+        __Interval: 12 days ahead from todays date__
+        * /prices/FR/by-interval/day/12
+        
+        __Interval: 50 days back from todays date__
+        * /prices/FR/by-interval/day/-50
+    parameters:
+      -
+        name: areaCode
+        description: >-
+          The Area Code represents the area of which the data comes from. This could be e.g. DK1
+          which equals Denmark (West), or FR which is France.
+        schema:
+          $ref: '#/components/schemas/AreaCode'
+        in: path
+        required: true
+      -
+        name: interval
+        description: >-
+          The interval/amount of days you want to look up in the past or future, e.g. 7 for 7 days
+          ahead, or -7 for 7 days back in time.
+          
+          
+          Max interval is 365 days (1 year).
+        schema:
+          type: integer
+        in: path
+        required: true
+      -
+        name: entsoe-security-token
+        description: Security Token provided by ENTSO-E.
+        schema:
+          type: string
+        in: header
+        required: true
+  '/prices/{areaCode}/by-interval/month/{interval}':
+    summary: Search Prices from ENTSO-E by a monthly interval ahead of back in time.
+    description: >-
+      By providing an area code and interval, you can look up prices from ENTSO-E in the specified area
+      by a monthly interval, just by specifying the interval as a number. This could be 5 months or -11
+      months from todays date.
+    get:
+      tags:
+        - PriceIntervalController
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricesResponse'
+          description: Return prices for the requested period.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+      operationId: getPricesByMonthlyInterval
+      summary: Get ENTSO-E Market Prices by a monthly interval.
+      description: |-
+        ## Interval by intervalType: Month
+        __Interval: 5 months ahead from todays date__
+        * /prices/FR/by-interval/month/5
+        
+        __Interval: 5 months back from todays date__
+        * /prices/FR/by-interval/day/-5
+    parameters:
+      -
+        name: areaCode
+        description: >-
+          The Area Code represents the area of which the data comes from. This could be e.g. DK1
+          which equals Denmark (West), or FR which is France.
+        schema:
+          $ref: '#/components/schemas/AreaCode'
+        in: path
+        required: true
+      -
+        name: interval
+        description: >-
+          The interval/amount of months you want to look up in the past or future, e.g. 1 for 1
+          month ahead, or -5 for 5 months back in time.
+          
+          
+          Max interval is 12 months (1 year).
+        schema:
+          type: integer
+        in: path
+        required: true
+      -
+        name: entsoe-security-token
+        description: Security Token provided by ENTSO-E.
+        schema:
+          type: string
+        in: header
+        required: true
+  '/prices/{areaCode}/by-interval/week/{interval}':
+    summary: Search Prices from ENTSO-E by a weekly interval ahead of back in time.
+    description: >-
+      By providing an area code and interval, you can look up prices from ENTSO-E in the specified area
+      by a weekly interval, just by specifying the interval as a number. This could be 4 weeks or -10
+      weeks from todays date.
+    get:
+      tags:
+        - PriceIntervalController
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricesResponse'
+          description: Return prices for the requested period.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+      operationId: getPricesByWeeklyInterval
+      summary: Get ENTSO-E Market Prices by a weekly interval.
+      description: |-
+        ## Interval by intervalType: Week
+        __Interval: 10 weeks ahead from todays date__
+        * /prices/FR/by-interval/week/10
+        
+        __Interval: 20 weeks back from todays date__
+        * /prices/FR/by-interval/day/-20
+    parameters:
+      -
+        name: areaCode
+        description: >-
+          The Area Code represents the area of which the data comes from. This could be e.g. DK1
+          which equals Denmark (West), or FR which is France.
+        schema:
+          $ref: '#/components/schemas/AreaCode'
+        in: path
+        required: true
+      -
+        name: interval
+        description: >-
+          The interval/amount of weeks you want to look up in the past or future, e.g. 7 for 7 weeks
+          ahead, or -7 for 7 weeks back in time.
+          
+          
+          Max interval is 53 weeks (1 year).
+        schema:
+          type: integer
+        in: path
+        required: true
+      -
+        name: entsoe-security-token
+        description: Security Token provided by ENTSO-E.
+        schema:
+          type: string
+        in: header
+        required: true
+  '/prices/{areaCode}/by-interval/year/{interval}':
+    summary: Search Prices from ENTSO-E by a yearly interval ahead of back in time.
+    description: >-
+      By providing an area code and interval, you can look up prices from ENTSO-E in the specified area
+      by a yearly interval, just by specifying the interval as a number. This is limited to 1 year ahead
+      or -1 for 1 year in the past.
+    get:
+      tags:
+        - PriceIntervalController
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricesResponse'
+          description: Return prices for the requested period.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+      operationId: getPricesByYearlyInterval
+      summary: Get ENTSO-E Market Prices by a yearly interval.
+      description: |-
+        ## Interval by intervalType: Year
+        __Interval: 1 year ahead from todays date__
+        * /prices/FR/by-interval/year/1
+        
+        __Interval: 1 year back from todays date__
+        * /prices/FR/by-interval/day/-1
+    parameters:
+      -
+        name: areaCode
+        description: >-
+          The Area Code represents the area of which the data comes from. This could be e.g. DK1
+          which equals Denmark (West), or FR which is France.
+        schema:
+          $ref: '#/components/schemas/AreaCode'
+        in: path
+        required: true
+      -
+        name: interval
+        description: >-
+          The interval/amount of days you want to look up in the past or future. This can either be
+          1 or -1 due to the limit by ENTSO-E.
+          
+          Max interval is 1 year.
+        schema:
+          type: integer
+        in: path
+        required: true
+      -
+        name: entsoe-security-token
+        description: Security Token provided by ENTSO-E.
+        schema:
+          type: string
+        in: header
+        required: true
+  '/prices/{areaCode}/by-month/{month}':
+    summary: Search Prices from ENTSO-E by a specific month.
+    description: >-
+      By providing an area code and a month, you can look up prices from ENTSO-E in the specified area
+      in that entire month, just by specifying the month as a number between 1 and 12. So if you want to
+      look up prices in June, the month would be 6.
+      
+      
+      If you want to look up June 2020, you can add the ?year=2020 parameter to the end of the query
+      (e.g. /prices/FR/by-month/6?year=2020).
+    get:
+      tags:
+        - PriceSpecificController
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricesResponse'
+          description: Return prices for the requested period.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+      operationId: getPricesByMonth
+      summary: Get ENTSO-E Market Prices by a specific month (and year).
+      description: |-
+        ## Interval by Month
+        __Interval: June of this year__
+        * /prices/FR/by-month/6
+        
+        __Interval: June of 2020__
+        * /prices/FR/by-month/6?year=2020
+    parameters:
+      -
+        name: areaCode
+        description: >-
+          The Area Code represents the area of which the data comes from. This could be e.g. DK1
+          which equals Denmark (West), or FR which is France.
+        schema:
+          $ref: '#/components/schemas/AreaCode'
+        in: path
+        required: true
+      -
+        name: month
+        description: 'The month of the year you want to look up the prices for, e.g. 7 july.'
+        schema:
+          type: integer
+        in: path
+        required: true
+      -
+        name: year
+        description: 'Specify a year, if you want to look up a month that is not in the current year, e.g. 2020.'
+        schema:
+          type: integer
+        in: query
+      -
+        name: entsoe-security-token
+        description: Security Token provided by ENTSO-E.
+        schema:
+          type: string
+        in: header
+        required: true
+  '/prices/{areaCode}/by-week/{week}':
+    summary: Search Prices from ENTSO-E by a specific week.
+    description: >-
+      By providing an area code and a week, you can look up prices from ENTSO-E in the specified area in
+      that entire week, just by specifying the week as a number between 1 and 53.
+      
+      
+      If you want to look up week 20 of 2020, you can add the ?year=2020 parameter to the end of the
+      query (e.g. /prices/FR/by-week/20?year=2020).
+    get:
+      tags:
+        - PriceSpecificController
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricesResponse'
+          description: Return prices for the requested period.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+      operationId: getPricesByWeek
+      summary: Get ENTSO-E Market Prices by a specific week (and year).
+      description: |-
+        ## Interval by Week
+        __Interval: Week 36 of this year__
+        * /prices/FR/by-week/36
+        
+        __Interval: Week 32 of 2020__
+        * /prices/FR/by-week/32?year=2020
+    parameters:
+      -
+        name: areaCode
+        description: >-
+          The Area Code represents the area of which the data comes from. This could be e.g. DK1
+          which equals Denmark (West), or FR which is France.
+        schema:
+          $ref: '#/components/schemas/AreaCode'
+        in: path
+        required: true
+      -
+        name: year
+        description: 'Specify a year, if you want to look up a week that is not in the current year, e.g. 2020.'
+        schema:
+          type: integer
+        in: query
+      -
+        name: entsoe-security-token
+        description: Security Token provided by ENTSO-E.
+        schema:
+          type: string
+        in: header
+        required: true
+      -
+        name: week
+        description: 'The week of the year you want to look up the prices for, e.g. 20.'
+        schema:
+          type: integer
+        in: path
+        required: true
+  '/prices/{areaCode}/by-year/{year}':
+    summary: Search Prices from ENTSO-E by a specific year.
+    description: >-
+      By providing an area code and a year, you can look up prices from ENTSO-E in the specified area in
+      that entire year, just by specifying the year as a number.
+    get:
+      tags:
+        - PriceSpecificController
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricesResponse'
+          description: Return prices for the requested period.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+      operationId: getPricesByYear
+      summary: Get ENTSO-E Market Prices by a specific year.
+    parameters:
+      -
+        name: areaCode
+        description: >-
+          The Area Code represents the area of which the data comes from. This could be e.g. DK1
+          which equals Denmark (West), or FR which is France.
+        schema:
+          $ref: '#/components/schemas/AreaCode'
+        in: path
+        required: true
+      -
+        name: entsoe-security-token
+        description: Security Token provided by ENTSO-E.
+        schema:
+          type: string
+        in: header
+        required: true
+      -
+        name: year
+        description: 'The year you want to look up the prices for, e.g. 2020.'
+        schema:
+          type: integer
+        in: path
+        required: true
+  '/prices/{areaCode}/by-month/':
+    summary: Search Prices from ENTSO-E from the current month.
+    description: >-
+      By providing an area code, you can look up prices from ENTSO-E in the specified area in the
+      current month. If you want to look up another month, you can do that just by specifying the month
+      as a number between 1 and 12 at the end of the URL path, e.g. /prices/FR/by-month/5 to get May of
+      this year.
+      
+      
+      If you want to look up May of 2020, you can add the ?year=2020 parameter to the end of the query
+      (e.g. /prices/FR/by-month/5?year=2020).
+    get:
+      tags:
+        - PriceSpecificController
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricesResponse'
+          description: Return prices for the requested period.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+      operationId: getPricesCurrentMonth
+      summary: Get ENTSO-E Market Prices for the current month.
+      description: |-
+        ## Interval by Month
+        __Interval: The current month__
+        * /prices/FR/by-month/
+        
+        __Interval: June of 2020__
+        * /prices/FR/by-month/6?year=2020
+    parameters:
+      -
+        name: areaCode
+        description: >-
+          The Area Code represents the area of which the data comes from. This could be e.g. DK1
+          which equals Denmark (West), or FR which is France.
+        schema:
+          $ref: '#/components/schemas/AreaCode'
+        in: path
+        required: true
+      -
+        name: year
+        description: 'Specify a year, if you want to look up a month that is not in the current year, e.g. 2020.'
+        schema:
+          type: integer
+        in: query
+      -
+        name: entsoe-security-token
+        description: Security Token provided by ENTSO-E.
+        schema:
+          type: string
+        in: header
+        required: true
+  '/prices/{areaCode}/by-week/':
+    summary: Search Prices from ENTSO-E from the current week.
+    description: >-
+      By providing an area code, you can look up prices from ENTSO-E in the specified area in the
+      current week. If you want to look up another week, you can do that just by specifying the week as
+      a number between 1 and 53 at the end of the URL path, e.g. /prices/FR/by-week/5 to get the 5th
+      week of this year.
+      
+      
+      If you want to look up week 32 of 2020, you can add the ?year=2020 parameter to the end of the
+      query (e.g. /prices/FR/by-week/32?year=2020).
+    get:
+      tags:
+        - PriceSpecificController
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricesResponse'
+          description: Return prices for the requested period.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+      operationId: getPricesCurrentWeek
+      summary: Get ENTSO-E Market Prices for the current month.
+      description: |-
+        ## Interval by Week
+        __Interval: The current week__
+        * /prices/FR/by-week/
+        
+        __Interval: Week 32 of 2020__
+        * /prices/FR/by-week/32?year=2020
+    parameters:
+      -
+        name: areaCode
+        description: >-
+          The Area Code represents the area of which the data comes from. This could be e.g. DK1
+          which equals Denmark (West), or FR which is France.
+        schema:
+          $ref: '#/components/schemas/AreaCode'
+        in: path
+        required: true
+      -
+        name: year
+        description: 'Specify a year, if you want to look up a week that is not in the current year, e.g. 2020.'
+        schema:
+          type: integer
+        in: query
+      -
+        name: entsoe-security-token
+        description: Security Token provided by ENTSO-E.
+        schema:
+          type: string
+        in: header
+        required: true
+  '/prices/{areaCode}/by-year/':
+    summary: Search Prices from ENTSO-E from the current year.
+    description: >-
+      By providing an area code, you can look up prices from ENTSO-E in the specified area in the
+      current year. If you want to look up another year, you can do that just by specifying the year as
+      a number at the end of the URL path, e.g. /prices/FR/by-year/2020 to get the prices from 2020.
+    get:
+      tags:
+        - PriceSpecificController
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricesResponse'
+          description: Return prices for the requested period.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+      operationId: getPricesCurrentYear
+      summary: Get ENTSO-E Market Prices for the current year.
+      description: |-
+        ## Interval by Year
+        __Interval: The current year__
+        * /prices/FR/by-year/
+        
+        __Interval: Year 2020__
+        * /prices/FR/by-year/2020
+    parameters:
+      -
+        name: areaCode
+        description: >-
+          The Area Code represents the area of which the data comes from. This could be e.g. DK1
+          which equals Denmark (West), or FR which is France.
+        schema:
+          $ref: '#/components/schemas/AreaCode'
+        in: path
+        required: true
+      -
+        name: entsoe-security-token
+        description: Security Token provided by ENTSO-E.
+        schema:
+          type: string
+        in: header
+        required: true
+  '/prices/{areaCode}/by-range/{fromDateTime}':
+    summary: Search Prices from ENTSO-E between todays date and the specified from date/time.
+    description: >-
+      By providing an from date, in the format of either YYYYMMDD (20221031) or YYMMDDHHMM
+      (202210312300), you can look up prices from ENTSO-E in the specified area, between the "from-date"
+      specified and todays date. 
+      
+      
+      Max 365 days (1 year) from todays date. date.
+    get:
+      tags:
+        - PriceRangeController
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricesResponse'
+          description: Return prices for the requested period.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+      operationId: getPricesByFromDate
+      summary: Get ENTSO-E Market Prices between a specified date and todays date.
+    parameters:
+      -
+        name: areaCode
+        description: >-
+          The Area Code represents the area of which the data comes from. This could be e.g. DK1
+          which equals Denmark (West), or FR which is France.
+        schema:
+          $ref: '#/components/schemas/AreaCode'
+        in: path
+        required: true
+      -
+        name: fromDateTime
+        description: >-
+          The date/time that you want the prices from/to. This could be a date/time in the past, or
+          the future, as long as it is no more than 365 days (1 year).
+          
+          Has to be specified in the format of either YYYYMMDD (20221031) or YYMMDDHHMM
+          (202210312300).
+        schema:
+          type: string
+        in: path
+        required: true
+      -
+        name: entsoe-security-token
+        description: Security Token provided by ENTSO-E.
+        schema:
+          type: string
+        in: header
+        required: true
+  '/prices/{areaCode}/by-range/{fromDateTime}/{toDateTime}':
+    summary: Search Prices from ENTSO-E between 2 specified dates.
+    description: >-
+      By providing a from and to date, in the format of either YYYYMMDD (20221031) or YYMMDDHHMM
+      (202210312300), you can look up prices from ENTSO-E in the specified area, between the 2 specified
+      dates.
+      
+      
+      Max 365 days (1 year) between the 2 dates.
+    get:
+      tags:
+        - PriceRangeController
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricesResponse'
+          description: Return prices for the requested period.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+      operationId: getPricesByFromToDate
+      summary: Get ENTSO-E Market Prices between a 2 dates.
+    parameters:
+      -
+        name: areaCode
+        description: >-
+          The Area Code represents the area of which the data comes from. This could be e.g. DK1
+          which equals Denmark (West), or FR which is France.
+        schema:
+          $ref: '#/components/schemas/AreaCode'
+        in: path
+        required: true
+      -
+        name: fromDateTime
+        description: >-
+          The date/time that you want the prices from. This can be no more than 365 days (1 year)
+          apart from the "to"-date.
+          
+          
+          Has to be specified in the format of either YYYYMMDD (20221031) or YYMMDDHHMM
+          (202210312300).
+        schema:
+          type: string
+        in: path
+        required: true
+      -
+        name: entsoe-security-token
+        description: Security Token provided by ENTSO-E.
+        schema:
+          type: string
+        in: header
+        required: true
+      -
+        name: toDateTime
+        description: >-
+          The date/time that you want the prices to. This can be no more than 365 days (1 year)
+          apart from the "from"-date.
+          
+          
+          Has to be specified in the format of either YYYYMMDD (20221031) or YYMMDDHHMM
+          (202210312300).
+        schema:
+          type: string
+        in: path
+        required: true
 components:
   schemas:
     ErrorMessage:
@@ -202,6 +1091,7 @@ components:
       x-class-extra-annotation: >-
         @lombok.Builder
         @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+        @com.fasterxml.jackson.annotation.JsonPropertyOrder({ "message", "details" })
     ErrorMessageDetail:
       description: ''
       type: object
@@ -212,7 +1102,10 @@ components:
         message:
           description: Information regarding the field error.
           type: string
-      x-class-extra-annotation: '@lombok.Builder'
+      x-class-extra-annotation: >-
+        @lombok.Builder
+        @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.ALWAYS)
+        @com.fasterxml.jackson.annotation.JsonPropertyOrder({ "field", "message" })
     IntervalType:
       description: 'Interval Type ENUM to define the interval type we''re searching for, e.g. month or week.'
       enum:
@@ -255,20 +1148,6 @@ components:
         - NO5
         - FI
       type: string
-    IntervalDay:
-      description: ''
-      type: object
-      properties:
-        date:
-          format: date
-          description: The start and end timestamp of the specific day of the period.
-          type: string
-        hourlyPrices:
-          description: Prices throughout the day.
-          type: array
-          items:
-            $ref: '#/components/schemas/PricePoint'
-      x-class-extra-annotation: '@lombok.Builder'
     PricePoint:
       description: ''
       type: object
@@ -277,65 +1156,148 @@ components:
           format: double
           description: ''
           type: number
-        priceHour:
-          format: date-time
+        hour:
           description: ''
           type: string
-      x-class-extra-annotation: '@lombok.Builder'
+      x-class-extra-annotation: >-
+        @lombok.Builder
+        @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.ALWAYS)
+        @com.fasterxml.jackson.annotation.JsonPropertyOrder({ "hour", "price" })
     TimeInterval:
       description: ''
       required: []
       type: object
       properties:
         start:
-          format: date-time
-          description: ''
+          description: Interval Start Date/Time
           type: string
+          example: '2022-10-15T22:00Z'
         end:
-          format: date-time
-          description: ''
+          description: Interval End Date/Time
           type: string
-      x-class-extra-annotation: '@lombok.Builder'
+          example: '2022-10-17T22:00Z'
+      x-class-extra-annotation: >-
+        @lombok.Builder
+        @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.ALWAYS)
+        @com.fasterxml.jackson.annotation.JsonPropertyOrder({ "start", "end" })
     PricesResponse:
       description: ''
       required: []
       type: object
       properties:
-        period:
+        createdDateTime:
+          description: Timestamp for Price Request creation.
+          type: string
+          example: '2022-10-19T05:00:55.466364'
+        area:
+          description: Area Name
+          type: string
+          example: FR - France
+        areaCode:
+          description: The ENTSO-E Area Code
+          type: string
+          example: 10YFR-RTE------C
+        timeInterval:
           $ref: '#/components/schemas/TimeInterval'
-          description: ''
-        typeCode:
-          description: ''
-          type: string
-          example: A44
-        currency:
-          description: ''
-          type: string
-          example: EUR
-        priceMeasureUnit:
-          description: ''
-          type: string
-          example: MWH
-        periodDays:
-          description: ''
+          description: The Interval of the prices requested
+        intervalDays:
+          description: A list of the daily price information.
           type: array
           items:
             $ref: '#/components/schemas/IntervalDay'
-      x-class-extra-annotation: '@lombok.Builder'
+      x-class-extra-annotation: >-
+        @lombok.Builder
+        @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.ALWAYS)
+        @com.fasterxml.jackson.annotation.JsonPropertyOrder({ "area", "areaCode", "timeInterval",
+        "intervalDays", "createdDateTime" })
+    IntervalDay:
+      description: The IntervalDay represents 1 day in the interval/range of the prices
+      type: object
+      properties:
+        currency:
+          description: Price Currency
+          type: string
+          example: EUR
+        measureUnit:
+          description: 'The measurement Unit related to the price, e.g. MWH.'
+          type: string
+          example: MWH
+        hourPrices:
+          description: A list of hourly prices throughout this Interval Date.
+          maxItems: 24
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/PricePoint'
+        currentDateInterval:
+          $ref: '#/components/schemas/TimeInterval'
+          description: The Interval of the current date
+      x-class-extra-annotation: >-
+        @lombok.Builder
+        @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.ALWAYS)
+        @com.fasterxml.jackson.annotation.JsonPropertyOrder({ "currentDateInterval", "currency",
+        "measureUnit", "hourPrices" })
   responses:
     400BadRequest:
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
-      description: Bad Request with more details
+          examples:
+            Invalid Query Paramter:
+              value:
+                message: 'Invalid Query Parameter: interval=test'
+                details:
+                  -
+                    field: interval
+                    message: >-
+                      Field should contain a value of type 'Integer'. Examples: 0, 1,
+                      123, -1, -20 etc.
+            Invalid Month Interval:
+              value:
+                message: Invalid parameters provided. See Details for more information.
+                details:
+                  -
+                    field: interval
+                    message: >-
+                      Monthly Intervals are limited to +/- 12 months (1 year). If you
+                      want to search for months further back in time, please use from/to
+                      or year/month parameters instead, e.g.
+                      /prices/FR?year=2020&month=10, or
+                      /prices/FR?from=20201001&to=20201231
+      description: >-
+        When receiving a Bad Request Error Response, it means that the input provided in the API call
+        is invalid.
+        
+        That could be an invalid combination of query paramters, an invalid ENTSO-E Security Token or
+        invalid input in the API Request paramteres.
     500InternalServerError:
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
-      description: ''
+          examples:
+            Internal Error:
+              value:
+                message: An error occurred and has been reported to developers.
+      description: >-
+        Error Message Response when an Internal Server error happened, e.g. ENTSO-E does not respond
+        etc.
+        
+        This error is not related to the request input, which means that the request is valid.
 tags:
   -
     name: PriceDataController
-    description: ''
+    description: This Controller contains all endpoints related to ENTSO-E Price Data.
+  -
+    name: PriceIntervalController
+    description: This controller contains all endpoints related to Interval requests.
+  -
+    name: PriceSpecificController
+    description: This controller contains all endpoints related to Year/Month/Week requests.
+  -
+    name: PriceRangeController
+    description: This controller contains all endpoints related to from/to datetime requests.
+externalDocs:
+  description: Find more info here
+  url: /apidocs

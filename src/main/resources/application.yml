@@ -9,6 +9,8 @@ spring:
     deserialization:
       fail-on-unknown-properties: false
       fail-on-reading-dup-tree-key: true
+    mapper:
+      accept-case-insensitive-enums: true
 
 server:
   port: 443
@@ -26,7 +28,9 @@ server:
     key-password: password
 
 entsoe:
-  baseurl: "https://transparency.entsoe.eu/api"
+  api-url: "https://transparency.entsoe.eu/api"
+  document-types:
+    prices: "A44"
 
 management:
   server:
@@ -56,3 +60,7 @@ logging:
       springframework:
         boot:
           autoconfigure: error
+
+springdoc:
+  swagger-ui:
+    path: /api-docs

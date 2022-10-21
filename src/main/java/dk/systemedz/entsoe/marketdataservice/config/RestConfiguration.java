@@ -17,5 +17,4 @@ public class RestConfiguration {
                 .setReadTimeout(Duration.ofSeconds(30))
                 .build();
     }
-
 }

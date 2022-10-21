@@ -44,28 +44,29 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	runtimeOnly 'org.postgresql:postgresql'
 	runtimeOnly 'com.h2database:h2'
-	compileOnly 'org.flywaydb:flyway-core:9.4.0'
+	//compileOnly 'org.flywaydb:flyway-core:9.4.0'
 
 	// OpenAPI
 	implementation('io.swagger:swagger-annotations:1.6.7') // Required to generate RestTemplate Client.
 	implementation('io.swagger.core.v3:swagger-annotations:2.2.3')
-	implementation('org.springdoc:springdoc-openapi-common:1.6.11')
-	implementation('org.openapitools:jackson-databind-nullable:0.2.3')
-	implementation('com.google.code.findbugs:jsr305:3.0.2')
+	implementation('org.springdoc:springdoc-openapi-ui:1.6.11')
+	//implementation('org.openapitools:jackson-databind-nullable:0.2.3')
+	//implementation('com.google.code.findbugs:jsr305:3.0.2')
 
 	// JSON/XML
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.0-rc1'
 	implementation 'com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.13.4'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.4'
+
 	// ENTSO-E XML
 	xjc "javax.xml.bind:jaxb-api:$jaxbVersion"
 	xjc "org.glassfish.jaxb:jaxb-runtime:$jaxbVersion"
 	xjc "org.glassfish.jaxb:jaxb-xjc:$jaxbVersion"
 
 	// Mapstruct
-	compileOnly "org.mapstruct:mapstruct:${mapstructVersion}"
-	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+	compileOnly "org.mapstruct:mapstruct:1.5.3.Final"
+	annotationProcessor "org.mapstruct:mapstruct-processor:1.5.3.Final"
 
 	// OPS / IO
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
@@ -79,7 +80,7 @@ dependencies {
 	// Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
-	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+	testAnnotationProcessor "org.mapstruct:mapstruct-processor:1.5.3.Final"
 }
 dependencyManagement {
 	imports {
@@ -112,7 +113,7 @@ openApiGenerate {
 	globalProperties.set( [models: "", apis: "", supportingFiles: "ApiUtil.java"] )
 }
 
-xjcGeneration {
+/*xjcGeneration {
 	schemas {
 		EntsoeIEC62325 {
 			schemaRootDir = "$projectDir/src/main/resources/entsoe/xsd"
@@ -121,7 +122,7 @@ xjcGeneration {
 			generatedOutputRootDir = file "$buildDir/generated"
 		}
 	}
-}
+}*/
 
 compileJava {
 	options.annotationProcessorPath = configurations.annotationProcessor

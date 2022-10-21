@@ -24,7 +24,7 @@ public class PublicationMarketDocument {
 
     @Setter(AccessLevel.NONE)
     @XmlElement(name = "areaCode")
-    private String areaCode;
+    private AreaCode areaCode;
 
     @XmlElement(name = "period.timeInterval")
     private TimeInterval timeInterval;
@@ -36,7 +36,7 @@ public class PublicationMarketDocument {
         AreaCode.getAreaCodeByValue(area)
                 .ifPresent(areaCode -> {
                     this.area = "%s - %s".formatted(areaCode.name(), areaCode.getAreaName());
-                    this.areaCode = areaCode.getAreaCode();
+                    this.areaCode = areaCode;
                 });
     }
 

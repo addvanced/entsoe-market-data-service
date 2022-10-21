@@ -33,4 +33,9 @@ public enum AreaCode {
                 .filter(aCode -> aCode.areaName.equalsIgnoreCase(value) || aCode.areaCode.equalsIgnoreCase(value))
                 .findFirst();
     }
+
+    public static boolean existsByName(String name) {
+        return Arrays.stream(AreaCode.values()).map(Enum::name)
+                .anyMatch(ac -> ac.equals(name.trim().toUpperCase()));
+    }
 }
