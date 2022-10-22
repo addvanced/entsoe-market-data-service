@@ -20,4 +20,11 @@ public class SecurityConfiguration {
                 .build();
     }
 
+    @Bean
+    @Profile("productionHttp")
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
+                .csrf().disable().authorizeRequests().anyRequest().permitAll().and().build();
+    }
+
 }
