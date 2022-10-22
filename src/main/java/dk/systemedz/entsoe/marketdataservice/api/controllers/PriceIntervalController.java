@@ -21,6 +21,7 @@ import java.util.*;
 
 import static dk.systemedz.entsoe.marketdataservice.api.validators.RestInputValidatorUtils.validateEntsoeSecurityTokenAndAreaCode;
 import static dk.systemedz.entsoe.marketdataservice.api.validators.RestInputValidatorUtils.validateInterval;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.springframework.http.ResponseEntity.ok;
 
 @Component
@@ -32,28 +33,41 @@ public class PriceIntervalController implements PriceIntervalControllerApiDelega
     private final DtoMapper mapper;
 
     @Override
-    public ResponseEntity<PricesResponseDto> getPricesByDailyInterval(AreaCodeDto areaCode, Integer interval, String entsoeSecurityToken) throws Exception {
+    public ResponseEntity<PricesResponseDto> getPricesByDailyInterval(AreaCodeDto areaCode, Integer interval, String entsoeSecurityToken, String securityToken) throws Exception {
+        if(isBlank(entsoeSecurityToken))
+            entsoeSecurityToken = securityToken;
+
         MarketDocument prices = getPricesByInterval(entsoeSecurityToken, areaCode, IntervalTypeDto.DAY, interval);
         return ok(mapper.mapPricesResponse(prices));
     }
 
     @Override
-    public ResponseEntity<PricesResponseDto> getPricesByMonthlyInterval(AreaCodeDto areaCode, Integer interval, String entsoeSecurityToken) throws Exception {
+    public ResponseEntity<PricesResponseDto> getPricesByMonthlyInterval(AreaCodeDto areaCode, Integer interval, String entsoeSecurityToken, String securityToken) throws Exception {
+        if(isBlank(entsoeSecurityToken))
+            entsoeSecurityToken = securityToken;
+
         MarketDocument prices = getPricesByInterval(entsoeSecurityToken, areaCode, IntervalTypeDto.MONTH, interval);
         return ok(mapper.mapPricesResponse(prices));
     }
 
     @Override
-    public ResponseEntity<PricesResponseDto> getPricesByWeeklyInterval(AreaCodeDto areaCode, Integer interval, String entsoeSecurityToken) throws Exception {
+    public ResponseEntity<PricesResponseDto> getPricesByWeeklyInterval(AreaCodeDto areaCode, Integer interval, String entsoeSecurityToken, String securityToken) throws Exception {
+        if(isBlank(entsoeSecurityToken))
+            entsoeSecurityToken = securityToken;
+
         MarketDocument prices = getPricesByInterval(entsoeSecurityToken, areaCode, IntervalTypeDto.WEEK, interval);
         return ok(mapper.mapPricesResponse(prices));
     }
 
     @Override
-    public ResponseEntity<PricesResponseDto> getPricesByYearlyInterval(AreaCodeDto areaCode, Integer interval, String entsoeSecurityToken) throws Exception {
+    public ResponseEntity<PricesResponseDto> getPricesByYearlyInterval(AreaCodeDto areaCode, Integer interval, String entsoeSecurityToken, String securityToken) throws Exception {
+        if(isBlank(entsoeSecurityToken))
+            entsoeSecurityToken = securityToken;
+
         MarketDocument prices = getPricesByInterval(entsoeSecurityToken, areaCode, IntervalTypeDto.YEAR, interval);
         return ok(mapper.mapPricesResponse(prices));
     }
+
 
     private MarketDocument getPricesByInterval(String entsoeSecurityToken, AreaCodeDto areaCode, IntervalTypeDto intervalType, Integer interval) {
         assertValidIntervalInputs(areaCode, entsoeSecurityToken, intervalType, interval);

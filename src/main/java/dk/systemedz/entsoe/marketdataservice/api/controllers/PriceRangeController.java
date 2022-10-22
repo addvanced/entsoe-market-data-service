@@ -25,6 +25,7 @@ import java.util.Map;
 
 import static dk.systemedz.entsoe.marketdataservice.api.validators.RestInputValidatorUtils.validateDateTimeRange;
 import static dk.systemedz.entsoe.marketdataservice.api.validators.RestInputValidatorUtils.validateEntsoeSecurityTokenAndAreaCode;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -37,13 +38,19 @@ public class PriceRangeController implements PriceRangeControllerApiDelegate {
     private final DtoMapper mapper;
 
     @Override
-    public ResponseEntity<PricesResponseDto> getPricesByFromDate(AreaCodeDto areaCode, String fromDateTime, String entsoeSecurityToken) throws Exception {
+    public ResponseEntity<PricesResponseDto> getPricesByFromDate(AreaCodeDto areaCode, String fromDateTime, String entsoeSecurityToken, String securityToken) throws Exception {
+        if(isBlank(entsoeSecurityToken))
+            entsoeSecurityToken = securityToken;
+
         MarketDocument prices = getPricesByRange(entsoeSecurityToken, areaCode, fromDateTime, LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE));
         return ok(mapper.mapPricesResponse(prices));
     }
 
     @Override
-    public ResponseEntity<PricesResponseDto> getPricesByFromToDate(AreaCodeDto areaCode, String fromDateTime, String entsoeSecurityToken, String toDateTime) throws Exception {
+    public ResponseEntity<PricesResponseDto> getPricesByFromToDate(AreaCodeDto areaCode, String fromDateTime, String toDateTime, String entsoeSecurityToken, String securityToken) throws Exception {
+        if(isBlank(entsoeSecurityToken))
+            entsoeSecurityToken = securityToken;
+
         MarketDocument prices = getPricesByRange(entsoeSecurityToken, areaCode, fromDateTime, toDateTime);
         return ok(mapper.mapPricesResponse(prices));
     }

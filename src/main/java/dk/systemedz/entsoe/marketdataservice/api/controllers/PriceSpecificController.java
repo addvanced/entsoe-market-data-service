@@ -23,6 +23,7 @@ import static dk.systemedz.entsoe.marketdataservice.api.validators.RestInputVali
 import static dk.systemedz.entsoe.marketdataservice.api.validators.RestInputValidatorUtils.validateYearMonthWeek;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.springframework.http.ResponseEntity.ok;
 
 @Component
@@ -33,42 +34,52 @@ public class PriceSpecificController implements PriceSpecificControllerApiDelega
     private final EntsoeService service;
     private final DtoMapper mapper;
 
+
     @Override
-    public ResponseEntity<PricesResponseDto> getPricesByMonth(AreaCodeDto areaCode, Integer month, String entsoeSecurityToken, Integer year) throws Exception {
+    public ResponseEntity<PricesResponseDto> getPricesByMonth(AreaCodeDto areaCode, Integer month, Integer year, String entsoeSecurityToken, String securityToken) throws Exception {
+        if(isBlank(entsoeSecurityToken))
+            entsoeSecurityToken = securityToken;
+
         MarketDocument prices = getPricesBySpecific(entsoeSecurityToken, areaCode, IntervalType.MONTH, month, year);
         return ok(mapper.mapPricesResponse(prices));
     }
 
     @Override
-    public ResponseEntity<PricesResponseDto> getPricesByWeek(AreaCodeDto areaCode, String entsoeSecurityToken, Integer week, Integer year) throws Exception {
+    public ResponseEntity<PricesResponseDto> getPricesByWeek(AreaCodeDto areaCode, Integer week, Integer year, String entsoeSecurityToken, String securityToken) throws Exception {
+        if(isBlank(entsoeSecurityToken))
+            entsoeSecurityToken = securityToken;
+
         MarketDocument prices = getPricesBySpecific(entsoeSecurityToken, areaCode, IntervalType.WEEK, week, year);
         return ok(mapper.mapPricesResponse(prices));
     }
 
     @Override
-    public ResponseEntity<PricesResponseDto> getPricesByYear(AreaCodeDto areaCode, String entsoeSecurityToken, Integer year) throws Exception {
-        MarketDocument prices = getPricesBySpecific(entsoeSecurityToken, areaCode, IntervalType.YEAR, year, year);
+    public ResponseEntity<PricesResponseDto> getPricesByYear(AreaCodeDto areaCode, Integer year, String entsoeSecurityToken, String securityToken) throws Exception {
+        if(isBlank(entsoeSecurityToken))
+            entsoeSecurityToken = securityToken;
+
+        Integer currentYear = Calendar.getInstance().get(Calendar.YEAR);
+        MarketDocument prices = getPricesBySpecific(entsoeSecurityToken, areaCode, IntervalType.YEAR, currentYear, currentYear);
         return ok(mapper.mapPricesResponse(prices));
     }
 
     @Override
-    public ResponseEntity<PricesResponseDto> getPricesCurrentMonth(AreaCodeDto areaCode, String entsoeSecurityToken, Integer year) throws Exception {
+    public ResponseEntity<PricesResponseDto> getPricesCurrentMonth(AreaCodeDto areaCode, Integer year, String entsoeSecurityToken, String securityToken) throws Exception {
+        if(isBlank(entsoeSecurityToken))
+            entsoeSecurityToken = securityToken;
+
         Integer currentMonth = Calendar.getInstance().get(Calendar.MONTH);
         MarketDocument prices = getPricesBySpecific(entsoeSecurityToken, areaCode, IntervalType.MONTH, currentMonth, year);
         return ok(mapper.mapPricesResponse(prices));
     }
 
     @Override
-    public ResponseEntity<PricesResponseDto> getPricesCurrentWeek(AreaCodeDto areaCode, String entsoeSecurityToken, Integer year) throws Exception {
+    public ResponseEntity<PricesResponseDto> getPricesCurrentWeek(AreaCodeDto areaCode, Integer year, String entsoeSecurityToken, String securityToken) throws Exception {
+        if(isBlank(entsoeSecurityToken))
+            entsoeSecurityToken = securityToken;
+
         Integer currentWeek = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
         MarketDocument prices = getPricesBySpecific(entsoeSecurityToken, areaCode, IntervalType.WEEK, currentWeek, year);
-        return ok(mapper.mapPricesResponse(prices));
-    }
-
-    @Override
-    public ResponseEntity<PricesResponseDto> getPricesCurrentYear(AreaCodeDto areaCode, String entsoeSecurityToken) throws Exception {
-        Integer currentYear = Calendar.getInstance().get(Calendar.YEAR);
-        MarketDocument prices = getPricesBySpecific(entsoeSecurityToken, areaCode, IntervalType.YEAR, currentYear, currentYear);
         return ok(mapper.mapPricesResponse(prices));
     }
 

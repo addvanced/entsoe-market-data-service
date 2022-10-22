@@ -30,8 +30,8 @@ public class PriceDataController implements PriceDataControllerApiDelegate {
     private final DtoMapper mapper;
 
     @Override
-    public ResponseEntity<PricesResponseDto> getMarketDocumentFromInterval(AreaCodeDto areaCode, String entsoeSecurityToken, String from, String to, Integer year, Integer month, Integer week, IntervalTypeDto intervalType, Integer interval) throws Exception {
-        return PriceDataControllerApiDelegate.super.getMarketDocumentFromInterval(areaCode, entsoeSecurityToken, from, to, year, month, week, intervalType, interval);
+    public ResponseEntity<PricesResponseDto> getMarketDocumentFromInterval(AreaCodeDto areaCode, String from, String to, Integer year, Integer month, Integer week, String entsoeSecurityToken, IntervalTypeDto intervalType, Integer interval, String securityToken) throws Exception {
+        return PriceDataControllerApiDelegate.super.getMarketDocumentFromInterval(areaCode, from, to, year, month, week, entsoeSecurityToken, intervalType, interval, securityToken);
     }
 
     /*@Override

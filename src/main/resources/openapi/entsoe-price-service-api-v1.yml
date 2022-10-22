@@ -371,7 +371,7 @@ paths:
         schema:
           type: string
         in: header
-        required: true
+        required: false
       -
         name: intervalType
         description: >-
@@ -390,6 +390,12 @@ paths:
         schema:
           format: int32
           type: integer
+        in: query
+      -
+        name: securityToken
+        description: ENTSO-E Security Token
+        schema:
+          type: string
         in: query
   '/prices/{areaCode}/by-interval/day/{interval}':
     summary: Search Prices from ENTSO-E by a daily interval ahead of back in time.
@@ -448,7 +454,13 @@ paths:
         schema:
           type: string
         in: header
-        required: true
+        required: false
+      -
+        name: securityToken
+        description: ENTSO-E Security Token
+        schema:
+          type: string
+        in: query
   '/prices/{areaCode}/by-interval/month/{interval}':
     summary: Search Prices from ENTSO-E by a monthly interval ahead of back in time.
     description: >-
@@ -506,7 +518,13 @@ paths:
         schema:
           type: string
         in: header
-        required: true
+        required: false
+      -
+        name: securityToken
+        description: ENTSO-E Security Token
+        schema:
+          type: string
+        in: query
   '/prices/{areaCode}/by-interval/week/{interval}':
     summary: Search Prices from ENTSO-E by a weekly interval ahead of back in time.
     description: >-
@@ -564,7 +582,13 @@ paths:
         schema:
           type: string
         in: header
-        required: true
+        required: false
+      -
+        name: securityToken
+        description: ENTSO-E Security Token
+        schema:
+          type: string
+        in: query
   '/prices/{areaCode}/by-interval/year/{interval}':
     summary: Search Prices from ENTSO-E by a yearly interval ahead of back in time.
     description: >-
@@ -621,7 +645,76 @@ paths:
         schema:
           type: string
         in: header
+        required: false
+      -
+        name: securityToken
+        description: ENTSO-E Security Token
+        schema:
+          type: string
+        in: query
+  '/prices/{areaCode}/by-month/':
+    summary: Search Prices from ENTSO-E from the current month.
+    description: >-
+      By providing an area code, you can look up prices from ENTSO-E in the specified area in the
+      current month. If you want to look up another month, you can do that just by specifying the month
+      as a number between 1 and 12 at the end of the URL path, e.g. /prices/FR/by-month/5 to get May of
+      this year.
+      
+      
+      If you want to look up May of 2020, you can add the ?year=2020 parameter to the end of the query
+      (e.g. /prices/FR/by-month/5?year=2020).
+    get:
+      tags:
+        - PriceSpecificController
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricesResponse'
+          description: Return prices for the requested period.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+      operationId: getPricesCurrentMonth
+      summary: Get ENTSO-E Market Prices for the current month.
+      description: |-
+        ## Interval by Month
+        __Interval: The current month__
+        * /prices/FR/by-month/
+        
+        __Interval: June of 2020__
+        * /prices/FR/by-month/6?year=2020
+    parameters:
+      -
+        name: areaCode
+        description: >-
+          The Area Code represents the area of which the data comes from. This could be e.g. DK1
+          which equals Denmark (West), or FR which is France.
+        schema:
+          $ref: '#/components/schemas/AreaCode'
+        in: path
         required: true
+      -
+        name: year
+        description: 'Specify a year, if you want to look up a month that is not in the current year, e.g. 2020.'
+        schema:
+          type: integer
+        in: query
+      -
+        name: entsoe-security-token
+        description: Security Token provided by ENTSO-E.
+        schema:
+          type: string
+        in: header
+        required: false
+      -
+        name: securityToken
+        description: ENTSO-E Security Token
+        schema:
+          type: string
+        in: query
   '/prices/{areaCode}/by-month/{month}':
     summary: Search Prices from ENTSO-E by a specific month.
     description: >-
@@ -684,77 +777,25 @@ paths:
         schema:
           type: string
         in: header
-        required: true
-  '/prices/{areaCode}/by-week/{week}':
-    summary: Search Prices from ENTSO-E by a specific week.
-    description: >-
-      By providing an area code and a week, you can look up prices from ENTSO-E in the specified area in
-      that entire week, just by specifying the week as a number between 1 and 53.
-      
-      
-      If you want to look up week 20 of 2020, you can add the ?year=2020 parameter to the end of the
-      query (e.g. /prices/FR/by-week/20?year=2020).
-    get:
-      tags:
-        - PriceSpecificController
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PricesResponse'
-          description: Return prices for the requested period.
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '500':
-          $ref: '#/components/responses/500InternalServerError'
-      operationId: getPricesByWeek
-      summary: Get ENTSO-E Market Prices by a specific week (and year).
-      description: |-
-        ## Interval by Week
-        __Interval: Week 36 of this year__
-        * /prices/FR/by-week/36
-        
-        __Interval: Week 32 of 2020__
-        * /prices/FR/by-week/32?year=2020
-    parameters:
+        required: false
       -
-        name: areaCode
-        description: >-
-          The Area Code represents the area of which the data comes from. This could be e.g. DK1
-          which equals Denmark (West), or FR which is France.
+        name: securityToken
+        description: ENTSO-E Security Token
         schema:
-          $ref: '#/components/schemas/AreaCode'
-        in: path
-        required: true
-      -
-        name: year
-        description: 'Specify a year, if you want to look up a week that is not in the current year, e.g. 2020.'
-        schema:
-          type: integer
+          type: string
         in: query
-      -
-        name: entsoe-security-token
-        description: Security Token provided by ENTSO-E.
-        schema:
-          type: string
-        in: header
-        required: true
-      -
-        name: week
-        description: 'The week of the year you want to look up the prices for, e.g. 20.'
-        schema:
-          type: integer
-        in: path
-        required: true
-  '/prices/{areaCode}/by-year/{year}':
-    summary: Search Prices from ENTSO-E by a specific year.
+  '/prices/{areaCode}/by-range/{fromDateTime}':
+    summary: Search Prices from ENTSO-E between todays date and the specified from date/time.
     description: >-
-      By providing an area code and a year, you can look up prices from ENTSO-E in the specified area in
-      that entire year, just by specifying the year as a number.
+      By providing an from date, in the format of either YYYYMMDD (20221031) or YYMMDDHHMM
+      (202210312300), you can look up prices from ENTSO-E in the specified area, between the "from-date"
+      specified and todays date. 
+      
+      
+      Max 365 days (1 year) from todays date. date.
     get:
       tags:
-        - PriceSpecificController
+        - PriceRangeController
       responses:
         '200':
           content:
@@ -766,8 +807,8 @@ paths:
           $ref: '#/components/responses/400BadRequest'
         '500':
           $ref: '#/components/responses/500InternalServerError'
-      operationId: getPricesByYear
-      summary: Get ENTSO-E Market Prices by a specific year.
+      operationId: getPricesByFromDate
+      summary: Get ENTSO-E Market Prices between a specified date and todays date.
     parameters:
       -
         name: areaCode
@@ -776,6 +817,18 @@ paths:
           which equals Denmark (West), or FR which is France.
         schema:
           $ref: '#/components/schemas/AreaCode'
+        in: path
+        required: true
+      -
+        name: fromDateTime
+        description: >-
+          The date/time that you want the prices from/to. This could be a date/time in the past, or
+          the future, as long as it is no more than 365 days (1 year).
+          
+          Has to be specified in the format of either YYYYMMDD (20221031) or YYMMDDHHMM
+          (202210312300).
+        schema:
+          type: string
         in: path
         required: true
       -
@@ -784,71 +837,87 @@ paths:
         schema:
           type: string
         in: header
-        required: true
+        required: false
       -
-        name: year
-        description: 'The year you want to look up the prices for, e.g. 2020.'
+        name: securityToken
+        description: ENTSO-E Security Token
         schema:
-          type: integer
-        in: path
-        required: true
-  '/prices/{areaCode}/by-month/':
-    summary: Search Prices from ENTSO-E from the current month.
-    description: >-
-      By providing an area code, you can look up prices from ENTSO-E in the specified area in the
-      current month. If you want to look up another month, you can do that just by specifying the month
-      as a number between 1 and 12 at the end of the URL path, e.g. /prices/FR/by-month/5 to get May of
-      this year.
-      
-      
-      If you want to look up May of 2020, you can add the ?year=2020 parameter to the end of the query
-      (e.g. /prices/FR/by-month/5?year=2020).
-    get:
-      tags:
-        - PriceSpecificController
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PricesResponse'
-          description: Return prices for the requested period.
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '500':
-          $ref: '#/components/responses/500InternalServerError'
-      operationId: getPricesCurrentMonth
-      summary: Get ENTSO-E Market Prices for the current month.
-      description: |-
-        ## Interval by Month
-        __Interval: The current month__
-        * /prices/FR/by-month/
-        
-        __Interval: June of 2020__
-        * /prices/FR/by-month/6?year=2020
-    parameters:
-      -
-        name: areaCode
-        description: >-
-          The Area Code represents the area of which the data comes from. This could be e.g. DK1
-          which equals Denmark (West), or FR which is France.
-        schema:
-          $ref: '#/components/schemas/AreaCode'
-        in: path
-        required: true
-      -
-        name: year
-        description: 'Specify a year, if you want to look up a month that is not in the current year, e.g. 2020.'
-        schema:
-          type: integer
+          type: string
         in: query
+  '/prices/{areaCode}/by-range/{fromDateTime}/{toDateTime}':
+    summary: Search Prices from ENTSO-E between 2 specified dates.
+    description: >-
+      By providing a from and to date, in the format of either YYYYMMDD (20221031) or YYMMDDHHMM
+      (202210312300), you can look up prices from ENTSO-E in the specified area, between the 2 specified
+      dates.
+      
+      
+      Max 365 days (1 year) between the 2 dates.
+    get:
+      tags:
+        - PriceRangeController
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricesResponse'
+          description: Return prices for the requested period.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+      operationId: getPricesByFromToDate
+      summary: Get ENTSO-E Market Prices between a 2 dates.
+    parameters:
+      -
+        name: areaCode
+        description: >-
+          The Area Code represents the area of which the data comes from. This could be e.g. DK1
+          which equals Denmark (West), or FR which is France.
+        schema:
+          $ref: '#/components/schemas/AreaCode'
+        in: path
+        required: true
+      -
+        name: fromDateTime
+        description: >-
+          The date/time that you want the prices from. This can be no more than 365 days (1 year)
+          apart from the "to"-date.
+          
+          
+          Has to be specified in the format of either YYYYMMDD (20221031) or YYMMDDHHMM
+          (202210312300).
+        schema:
+          type: string
+        in: path
+        required: true
       -
         name: entsoe-security-token
         description: Security Token provided by ENTSO-E.
         schema:
           type: string
         in: header
+        required: false
+      -
+        name: toDateTime
+        description: >-
+          The date/time that you want the prices to. This can be no more than 365 days (1 year)
+          apart from the "from"-date.
+          
+          
+          Has to be specified in the format of either YYYYMMDD (20221031) or YYMMDDHHMM
+          (202210312300).
+        schema:
+          type: string
+        in: path
         required: true
+      -
+        name: securityToken
+        description: ENTSO-E Security Token
+        schema:
+          type: string
+        in: query
   '/prices/{areaCode}/by-week/':
     summary: Search Prices from ENTSO-E from the current week.
     description: >-
@@ -905,7 +974,81 @@ paths:
         schema:
           type: string
         in: header
+        required: false
+      -
+        name: securityToken
+        description: ENTSO-E Security Token
+        schema:
+          type: string
+        in: query
+  '/prices/{areaCode}/by-week/{week}':
+    summary: Search Prices from ENTSO-E by a specific week.
+    description: >-
+      By providing an area code and a week, you can look up prices from ENTSO-E in the specified area in
+      that entire week, just by specifying the week as a number between 1 and 53.
+      
+      
+      If you want to look up week 20 of 2020, you can add the ?year=2020 parameter to the end of the
+      query (e.g. /prices/FR/by-week/20?year=2020).
+    get:
+      tags:
+        - PriceSpecificController
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricesResponse'
+          description: Return prices for the requested period.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+      operationId: getPricesByWeek
+      summary: Get ENTSO-E Market Prices by a specific week (and year).
+      description: |-
+        ## Interval by Week
+        __Interval: Week 36 of this year__
+        * /prices/FR/by-week/36
+        
+        __Interval: Week 32 of 2020__
+        * /prices/FR/by-week/32?year=2020
+    parameters:
+      -
+        name: areaCode
+        description: >-
+          The Area Code represents the area of which the data comes from. This could be e.g. DK1
+          which equals Denmark (West), or FR which is France.
+        schema:
+          $ref: '#/components/schemas/AreaCode'
+        in: path
         required: true
+      -
+        name: year
+        description: 'Specify a year, if you want to look up a week that is not in the current year, e.g. 2020.'
+        schema:
+          type: integer
+        in: query
+      -
+        name: entsoe-security-token
+        description: Security Token provided by ENTSO-E.
+        schema:
+          type: string
+        in: header
+        required: false
+      -
+        name: week
+        description: 'The week of the year you want to look up the prices for, e.g. 20.'
+        schema:
+          type: integer
+        in: path
+        required: true
+      -
+        name: securityToken
+        description: ENTSO-E Security Token
+        schema:
+          type: string
+        in: query
   '/prices/{areaCode}/by-year/':
     summary: Search Prices from ENTSO-E from the current year.
     description: >-
@@ -951,19 +1094,21 @@ paths:
         schema:
           type: string
         in: header
-        required: true
-  '/prices/{areaCode}/by-range/{fromDateTime}':
-    summary: Search Prices from ENTSO-E between todays date and the specified from date/time.
+        required: false
+      -
+        name: securityToken
+        description: ENTSO-E Security Token
+        schema:
+          type: string
+        in: query
+  '/prices/{areaCode}/by-year/{year}':
+    summary: Search Prices from ENTSO-E by a specific year.
     description: >-
-      By providing an from date, in the format of either YYYYMMDD (20221031) or YYMMDDHHMM
-      (202210312300), you can look up prices from ENTSO-E in the specified area, between the "from-date"
-      specified and todays date. 
-      
-      
-      Max 365 days (1 year) from todays date. date.
+      By providing an area code and a year, you can look up prices from ENTSO-E in the specified area in
+      that entire year, just by specifying the year as a number.
     get:
       tags:
-        - PriceRangeController
+        - PriceSpecificController
       responses:
         '200':
           content:
@@ -975,8 +1120,8 @@ paths:
           $ref: '#/components/responses/400BadRequest'
         '500':
           $ref: '#/components/responses/500InternalServerError'
-      operationId: getPricesByFromDate
-      summary: Get ENTSO-E Market Prices between a specified date and todays date.
+      operationId: getPricesByYear
+      summary: Get ENTSO-E Market Prices by a specific year.
     parameters:
       -
         name: areaCode
@@ -988,92 +1133,25 @@ paths:
         in: path
         required: true
       -
-        name: fromDateTime
-        description: >-
-          The date/time that you want the prices from/to. This could be a date/time in the past, or
-          the future, as long as it is no more than 365 days (1 year).
-          
-          Has to be specified in the format of either YYYYMMDD (20221031) or YYMMDDHHMM
-          (202210312300).
-        schema:
-          type: string
-        in: path
-        required: true
-      -
         name: entsoe-security-token
         description: Security Token provided by ENTSO-E.
         schema:
           type: string
         in: header
-        required: true
-  '/prices/{areaCode}/by-range/{fromDateTime}/{toDateTime}':
-    summary: Search Prices from ENTSO-E between 2 specified dates.
-    description: >-
-      By providing a from and to date, in the format of either YYYYMMDD (20221031) or YYMMDDHHMM
-      (202210312300), you can look up prices from ENTSO-E in the specified area, between the 2 specified
-      dates.
-      
-      
-      Max 365 days (1 year) between the 2 dates.
-    get:
-      tags:
-        - PriceRangeController
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PricesResponse'
-          description: Return prices for the requested period.
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '500':
-          $ref: '#/components/responses/500InternalServerError'
-      operationId: getPricesByFromToDate
-      summary: Get ENTSO-E Market Prices between a 2 dates.
-    parameters:
+        required: false
       -
-        name: areaCode
-        description: >-
-          The Area Code represents the area of which the data comes from. This could be e.g. DK1
-          which equals Denmark (West), or FR which is France.
+        name: year
+        description: 'The year you want to look up the prices for, e.g. 2020.'
         schema:
-          $ref: '#/components/schemas/AreaCode'
+          type: integer
         in: path
         required: true
       -
-        name: fromDateTime
-        description: >-
-          The date/time that you want the prices from. This can be no more than 365 days (1 year)
-          apart from the "to"-date.
-          
-          
-          Has to be specified in the format of either YYYYMMDD (20221031) or YYMMDDHHMM
-          (202210312300).
+        name: securityToken
+        description: ENTSO-E Security Token
         schema:
           type: string
-        in: path
-        required: true
-      -
-        name: entsoe-security-token
-        description: Security Token provided by ENTSO-E.
-        schema:
-          type: string
-        in: header
-        required: true
-      -
-        name: toDateTime
-        description: >-
-          The date/time that you want the prices to. This can be no more than 365 days (1 year)
-          apart from the "from"-date.
-          
-          
-          Has to be specified in the format of either YYYYMMDD (20221031) or YYMMDDHHMM
-          (202210312300).
-        schema:
-          type: string
-        in: path
-        required: true
+        in: query
 components:
   schemas:
     ErrorMessage:
