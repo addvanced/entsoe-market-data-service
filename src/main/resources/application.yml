@@ -13,7 +13,7 @@ spring:
       accept-case-insensitive-enums: true
 
 server:
-  port: ${service-port:443}
+  port: ${SERVICE_PORT:443}
   compression:
     enabled: true
     min-response-size: 4096
