@@ -13,13 +13,13 @@ spring:
       accept-case-insensitive-enums: true
 
 server:
-  port: ${SERVICE_PORT:80}
-  compression:
-    enabled: true
-    min-response-size: 4096
-  error:
-    whitelabel:
-      enabled: false
+  port: ${SERVICE_PORT:443}
+  ssl:
+    key-store: classpath:entsoe.p12
+    key-store-password: password
+    key-store-type: pkcs12
+    key-alias: entsoe
+    key-password: password
 
 entsoe:
   api-url: "https://transparency.entsoe.eu/api"

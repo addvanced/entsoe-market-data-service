@@ -1,2 +1,8 @@
 server:
   port: 8443
+  ssl:
+    key-store: classpath:entsoe.p12
+    key-store-password: password
+    key-store-type: pkcs12
+    key-alias: entsoe
+    key-password: password
