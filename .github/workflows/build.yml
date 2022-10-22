@@ -22,9 +22,9 @@ jobs:
         run: echo ::set-output name=tag::$(echo ${GITHUB_SHA:10})
       - name: Docker login
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-        run: docker login -u="$DOCKER_USERNAME" -p="DOCKERHUB_TOKEN" docker.io
+        run: docker login -u="$DOCKER_USERNAME" -p="$DOCKERHUB_TOKEN" docker.io
       - name: Build Docker image with latest tag
         run: docker build . --file Dockerfile --tag systemedz/entsoe-market-data-service:latest
       - name: Publish Docker image to Docker Hub
