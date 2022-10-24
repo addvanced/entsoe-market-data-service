@@ -13,7 +13,8 @@ public class DateTimeUtils {
 
     private static final LocalTime TIME_2300 = LocalTime.of(23,0,0,0);
     private static final DateTimeFormatter DATE_PATTERN = DateTimeFormatter.BASIC_ISO_DATE; // yyyyMMdd = 20221231
-    private static final DateTimeFormatter DATE_TIME_PATTERN = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+    private static final DateTimeFormatter ENTSOE_QUERY_DATE_TIME_PATTERN = DateTimeFormatter.ofPattern("yyyyMMddHHmm"); // yyyyMMddHHMM = 202212312300
+
     private static final DateTimeFormatter ENTSOE_DATE_TIME_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm'Z'");
 
     public static LocalDateTime createLocalDateTimeNow() {
@@ -21,14 +22,14 @@ public class DateTimeUtils {
     }
 
     public static LocalDateTime createLocalDateTimeFromString(String localDateTime) {
-        if(isBlank(localDateTime))
-            return LocalDateTime.of(LocalDate.now(), TIME_2300);
+        if(isBlank(localDateTime) || localDateTime.trim().length() < 8)
+            return LocalDate.now().atTime(TIME_2300);
 
-        localDateTime = localDateTime.trim();
-        if(localDateTime.length() > 8)
-            localDateTime = localDateTime.substring(0,8);
+        return LocalDate.parse(localDateTime.trim().substring(0,8), DATE_PATTERN).atTime(TIME_2300);
+    }
 
-        return LocalDateTime.of(LocalDate.parse(localDateTime, DATE_PATTERN), TIME_2300);
+    public static LocalDateTime setHours(LocalDateTime localDateTime) {
+        return localDateTime.toLocalDate().atTime(TIME_2300);
     }
 
     /**
@@ -42,6 +43,10 @@ public class DateTimeUtils {
                 .atZone(ZoneOffset.UTC.normalized())
                 .toLocalDateTime();
 
-        return localDateTime;
+        return setHours(localDateTime);
+    }
+
+    public static String createEntsoeQueryDateTime(LocalDateTime localDateTime) {
+        return setHours(localDateTime).format(ENTSOE_QUERY_DATE_TIME_PATTERN);
     }
 }

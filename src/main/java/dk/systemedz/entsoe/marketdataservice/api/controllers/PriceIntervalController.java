@@ -33,6 +33,24 @@ public class PriceIntervalController implements PriceIntervalControllerApiDelega
     private final DtoMapper mapper;
 
     @Override
+    public ResponseEntity<PricesResponseDto> getPricesByDayAhead(AreaCodeDto areaCode, String entsoeSecurityToken, String securityToken) throws Exception {
+        if(isBlank(entsoeSecurityToken))
+            entsoeSecurityToken = securityToken;
+
+        MarketDocument prices = getPricesByInterval(entsoeSecurityToken, areaCode, IntervalTypeDto.DAY, -1);
+        return ok(mapper.mapPricesResponse(prices));
+    }
+
+    @Override
+    public ResponseEntity<PricesResponseDto> getPricesByYearlyInterval(AreaCodeDto areaCode, String entsoeSecurityToken, String securityToken) throws Exception {
+        if(isBlank(entsoeSecurityToken))
+            entsoeSecurityToken = securityToken;
+
+        MarketDocument prices = getPricesByInterval(entsoeSecurityToken, areaCode, IntervalTypeDto.YEAR, 1);
+        return ok(mapper.mapPricesResponse(prices));
+    }
+
+    @Override
     public ResponseEntity<PricesResponseDto> getPricesByDailyInterval(AreaCodeDto areaCode, Integer interval, String entsoeSecurityToken, String securityToken) throws Exception {
         if(isBlank(entsoeSecurityToken))
             entsoeSecurityToken = securityToken;
@@ -59,16 +77,6 @@ public class PriceIntervalController implements PriceIntervalControllerApiDelega
         return ok(mapper.mapPricesResponse(prices));
     }
 
-    @Override
-    public ResponseEntity<PricesResponseDto> getPricesByYearlyInterval(AreaCodeDto areaCode, Integer interval, String entsoeSecurityToken, String securityToken) throws Exception {
-        if(isBlank(entsoeSecurityToken))
-            entsoeSecurityToken = securityToken;
-
-        MarketDocument prices = getPricesByInterval(entsoeSecurityToken, areaCode, IntervalTypeDto.YEAR, interval);
-        return ok(mapper.mapPricesResponse(prices));
-    }
-
-
     private MarketDocument getPricesByInterval(String entsoeSecurityToken, AreaCodeDto areaCode, IntervalTypeDto intervalType, Integer interval) {
         assertValidIntervalInputs(areaCode, entsoeSecurityToken, intervalType, interval);
 
@@ -79,7 +87,9 @@ public class PriceIntervalController implements PriceIntervalControllerApiDelega
 
             return service.
                     getPricesFromEntsoeApi(entsoeSecurityToken.trim(), AreaCode.valueOf(areaCode.name()).getAreaCode(), params, QueryType.INTERVAL);
-        }  catch (RuntimeException e) {
+        }  catch (RestCallException re) {
+            throw new RestCallException("No data provided by ENTSO-E. Try another interval.", HttpStatus.NO_CONTENT);
+        } catch (RuntimeException e) {
             log.error("Error:", e);
             throw new RestCallException("Something went wrong", HttpStatus.BAD_REQUEST, e);
         }

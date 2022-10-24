@@ -37,21 +37,18 @@ dependencies {
 	implementation ('org.springframework.boot:spring-boot-starter-undertow') {
 		exclude module: "undertow-websockets-jsr"
 	}
-	implementation 'org.springframework.cloud:spring-cloud-starter'
-	//implementation 'org.springframework.boot:spring-boot-starter-security'
+	//implementation 'org.springframework.cloud:spring-cloud-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 
 	// Database
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	runtimeOnly 'org.postgresql:postgresql'
-	runtimeOnly 'com.h2database:h2'
+	//implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	//runtimeOnly 'org.postgresql:postgresql'
+	//runtimeOnly 'com.h2database:h2'
 	//compileOnly 'org.flywaydb:flyway-core:9.4.0'
 
 	// OpenAPI
-	implementation('io.swagger:swagger-annotations:1.6.7') // Required to generate RestTemplate Client.
-	implementation('io.swagger.core.v3:swagger-annotations:2.2.3')
-	implementation('org.springdoc:springdoc-openapi-ui:1.6.11')
-	//implementation('org.openapitools:jackson-databind-nullable:0.2.3')
-	//implementation('com.google.code.findbugs:jsr305:3.0.2')
+	implementation('org.springdoc:springdoc-openapi-ui:1.6.12')
+	implementation('org.springdoc:springdoc-openapi-security:1.6.12')
 
 	// JSON/XML
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
@@ -71,11 +68,14 @@ dependencies {
 	// OPS / IO
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	//developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
 	// Commons
 	implementation("com.google.guava:guava:31.1-jre")
+
+	// Caching
+	implementation 'org.springframework.boot:spring-boot-starter-cache:2.7.4'
 
 	// Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

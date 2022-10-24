@@ -6,3 +6,9 @@ server:
     key-store-type: pkcs12
     key-alias: entsoe
     key-password: password
+
+logging:
+  level:
+    org:
+      springframework:
+        cache: TRACE

@@ -4,6 +4,7 @@ import dk.systemedz.entsoe.marketdataservice.api.dto.AreaCodeDto;
 import dk.systemedz.entsoe.marketdataservice.api.dto.ErrorMessageDetailDto;
 import dk.systemedz.entsoe.marketdataservice.api.dto.IntervalTypeDto;
 import dk.systemedz.entsoe.marketdataservice.domain.models.enums.AreaCode;
+import dk.systemedz.entsoe.marketdataservice.utils.DateTimeUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,7 +29,8 @@ public class RestInputValidatorUtils {
         if(isBlank(entsoeSecurityToken)) {
             details.add(ErrorMessageDetailDto.builder()
                     .field("entsoe-security-token")
-                    .message("ENTSO-E Security Token has to be provided in the header with header key: entsoe-security-token")
+                    .message("ENTSO-E Security Token has to be provided in the header with header key 'entsoe-security-token', " +
+                            "or by adding it to the URL with the query parameter '?securityToken='.")
                     .build());
         }
         details.addAll(validateAreaCode(areaCode));
@@ -78,18 +80,18 @@ public class RestInputValidatorUtils {
                 LocalDate dateTime =
                         LocalDate.parse(from, from.length() == 8 ?
                                 DateTimeFormatter.BASIC_ISO_DATE : DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
-                LocalDateTime fromDate = LocalDateTime.parse(from.substring(0,8), DateTimeFormatter.ISO_DATE_TIME)
-                        .withHour(23)
-                        .withMinute(0)
-                        .withSecond(0)
-                        .withNano(0);
 
-                LocalDateTime toDate = LocalDateTime.now()
-                        .withHour(23)
-                        .withMinute(0)
-                        .withSecond(0)
-                        .withNano(0);
+                LocalDateTime fromDate = DateTimeUtils.createLocalDateTimeFromString(from.substring(0,8));
+                LocalDateTime toDate = DateTimeUtils.createLocalDateTimeNow();
 
+                if(fromDate.toLocalDate().isBefore(LocalDate.of(2015,04,01))) {
+                    details.add(ErrorMessageDetailDto.builder()
+                            .field("from")
+                            .message("No data available prior to April 1st, 2015." +
+                                    "ENTSO-E does not provide any data prior to April 1st, 2015. Please correct your from-date " +
+                                    "to a date equal to, or after April 1st, 2015.")
+                            .build());
+                }
                 if (isNotBlank(to)) {
                     to = to.trim();
 
@@ -100,18 +102,23 @@ public class RestInputValidatorUtils {
                                         "Example: December 1st, 2022 at 23:00 (11PM) would either be 20221201 or 202212012300.")
                                 .build());
                     } else {
-                        toDate = LocalDateTime.parse(to.substring(0,8), DateTimeFormatter.BASIC_ISO_DATE)
-                                .withHour(23)
-                                .withMinute(0)
-                                .withSecond(0)
-                                .withNano(0);
+                        toDate = DateTimeUtils.createLocalDateTimeFromString(to.substring(0,8));
+
+                        if(toDate.toLocalDate().isAfter(LocalDate.now().plusDays(1))) {
+                            details.add(ErrorMessageDetailDto.builder()
+                                    .field("to")
+                                    .message("The to-date can only be set to 1 date after today's date, which is %s" +
+                                            "Alternatively, you can look up day-ahead prices by using the endpoint: " +
+                                            "/prices/{areaCode}/by-interval/day/next".formatted(LocalDate.now().plusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd2300"))))
+                                    .build());
+                        }
                     }
                 }
 
                 if (ChronoUnit.DAYS.between(fromDate, toDate) > 365) {
                     details.add(ErrorMessageDetailDto.builder()
                             .field("from/to")
-                            .message("Date range is limited to +/- 365 days (1 year). " +
+                            .message("Date range is limited to 365 days (1 year). " +
                                     "If you want to search for days further back in time, " +
                                     "please ensure that there is no more than 365 days between from and to.")
                             .build());
@@ -150,7 +157,7 @@ public class RestInputValidatorUtils {
         }
 
         if(nonNull(year) && nonNull(month)) {
-            if(month > currentMonth)
+            if(year == currentYear && month > currentMonth)
                 details.add(ErrorMessageDetailDto.builder()
                         .field("month")
                         .message("The month provided has to be before or equals to %s.".formatted(currentMonth))
@@ -165,8 +172,36 @@ public class RestInputValidatorUtils {
                         .build());
         }
 
+        if(year < 2015) {
+            details.add(ErrorMessageDetailDto.builder()
+                    .field("year")
+                    .message("No data available prior to April 1st, 2015." +
+                            "ENTSO-E does not provide any data prior to April 1st, 2015. Please correct your year" +
+                            "to a year equal to, or after 2015.")
+                    .build());
+        }
+        if(year == 2015 && month < 4) {
+            details.add(ErrorMessageDetailDto.builder()
+                    .field("month")
+                    .message("No data available prior to April 1st, 2015." +
+                            "ENTSO-E does not provide any data prior to April 1st, 2015. Please correct your month" +
+                            "to a month equal to, or after 4 (april).")
+                    .build());
+        }
+
+        if(year == 2015 && month < 15) {
+            details.add(ErrorMessageDetailDto.builder()
+                    .field("week")
+                    .message("No data available prior to April 1st, 2015." +
+                            "ENTSO-E does not provide any data prior to April 1st, 2015. Please correct your week" +
+                            "to a week equal to, or after 15 (April 6th - 12th 2015).")
+                    .build());
+        }
+
         return details;
     }
+
+
     public static List<ErrorMessageDetailDto> validateInterval(IntervalTypeDto intervalType, Integer interval) {
         List<ErrorMessageDetailDto> details = new ArrayList<>();
 
@@ -180,39 +215,39 @@ public class RestInputValidatorUtils {
         if(interval == 0) {
             details.add(ErrorMessageDetailDto.builder()
                     .field("interval")
-                    .message("Interval cannot be set to 0. It should be greater or less than 0, e.g. 7 or -30.")
+                    .message("Interval cannot be set to 0. It should be -1 (only for daily intervals) or greather than 1.")
                     .build());
         }
 
-        if(intervalType.equals(IntervalTypeDto.YEAR) && (interval > 1 || interval < -1)) {
+        if(intervalType.equals(IntervalTypeDto.YEAR) && (interval != 1)) {
             details.add(ErrorMessageDetailDto.builder()
                     .field("interval")
-                    .message("Yearly Intervals are limited to +/- 1 year. " +
+                    .message("Yearly Intervals are limited to 1 year. " +
                             "If you want to search for a specific year, e.g. 2020, please use the 'year' parameter instead (e.g. /prices/FR?year=2020).")
                     .build());
         }
 
-        if(intervalType.equals(IntervalTypeDto.MONTH) && (interval > 12 || interval < -12)) {
+        if(intervalType.equals(IntervalTypeDto.MONTH) && (interval > 12 || interval < 1)) {
             details.add(ErrorMessageDetailDto.builder()
                     .field("interval")
-                    .message("Monthly Intervals are limited to +/- 12 months (1 year). " +
+                    .message("Monthly Intervals has to be between 1 - 12 months (1 year). " +
                             "If you want to search for months further back in time, please use from/to or year/month parameters instead, " +
                             "e.g. /prices/FR?year=2020&month=10, or /prices/FR?from=20201001&to=20201231")
                     .build());
         }
-        if(intervalType.equals(IntervalTypeDto.WEEK) && (interval > 53 || interval < -53)) {
+        if(intervalType.equals(IntervalTypeDto.WEEK) && (interval > 53 || interval < 1)) {
             details.add(ErrorMessageDetailDto.builder()
                     .field("interval")
-                    .message("Weekly Intervals are limited to +/- 53 weeks (1 year). " +
+                    .message("Weekly Intervals has to be between 1 - 53 weeks (1 year). " +
                             "If you want to search for weeks further back in time, please use from/to or year/week parameters instead, " +
                             "e.g. /prices/FR?year=2020&week=36, or /prices/FR?from=2020831&to=20200906")
                     .build());
         }
 
-        if(intervalType.equals(IntervalTypeDto.DAY) && (interval > 365 || interval < -365)) {
+        if(intervalType.equals(IntervalTypeDto.DAY) && (interval > 365 || interval < -1)) {
             details.add(ErrorMessageDetailDto.builder()
                     .field("interval")
-                    .message("Daily Intervals are limited to +/- 365 days (1 year). " +
+                    .message("Daily Intervals are limited to -1 - 365 days (day ahead to 1 year). " +
                             "If you want to search for days further back in time, please use from/to parameters instead, " +
                             "e.g. /prices/FR?from=20210801&to=20220731")
                     .build());

@@ -56,5 +56,11 @@ logging:
           autoconfigure: error
 
 springdoc:
-  swagger-ui:
-    path: /api-docs
+  model-and-view-allowed: true
+  use-fqn: true
+  consumes-to-match:
+  paths-to-exclude:
+    - "/api/v1/prices/{areaCode}"
+  api-docs:
+    groups:
+      enabled: true

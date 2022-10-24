@@ -22,3 +22,6 @@ useOptional: false
 disallowAdditionalPropertiesIfNotPresent: false
 unhandledException: true
 booleanGetterPrefix: is
+
+additionalModelTypeAnnotations: '@lombok.Builder'
+additionalEnumTypeAnnotations: '@Schema'

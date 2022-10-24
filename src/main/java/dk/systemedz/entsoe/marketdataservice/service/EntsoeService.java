@@ -8,12 +8,15 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import dk.systemedz.entsoe.marketdataservice.domain.models.MarketDocument;
 import dk.systemedz.entsoe.marketdataservice.domain.models.enums.IntervalType;
 import dk.systemedz.entsoe.marketdataservice.domain.models.enums.QueryType;
+import dk.systemedz.entsoe.marketdataservice.exceptions.rest.RestCallException;
 import dk.systemedz.entsoe.marketdataservice.infrastructure.EntsoeApiClient;
 import dk.systemedz.entsoe.marketdataservice.infrastructure.entity.PublicationMarketDocument;
 import dk.systemedz.entsoe.marketdataservice.service.mappers.EntityMapper;
 import dk.systemedz.entsoe.marketdataservice.utils.DateTimeUtils;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,6 +26,7 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.Map;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -33,7 +37,7 @@ public class EntsoeService {
     private final EntsoeApiClient entsoeApiClient;
     private final EntityMapper mapper;
 
-    public MarketDocument getPricesFromEntsoeApi(String securityToken, String areaCode, Map<String,String> params, QueryType queryType) {
+    public MarketDocument getPricesFromEntsoeApi(String securityToken, String areaCode, Map<String,String> params, QueryType queryType) throws RestCallException {
 
         try {
             Pair<String, String> dateInterval = switch (queryType) {
@@ -55,8 +59,12 @@ public class EntsoeService {
 
             prepareDocument(document, areaCode);
 
-            //return new MarketDocument();
-            return mapper.mapMarketDocument(document);
+            MarketDocument marketDocument = mapper.mapMarketDocument(document);
+
+            if(isNull(marketDocument.getIntervalDays()) || marketDocument.getIntervalDays().isEmpty())
+                throw new RestCallException("No data provided by ENTSO-E. Try another interval.", HttpStatus.NO_CONTENT);
+
+            return marketDocument;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -82,7 +90,8 @@ public class EntsoeService {
                 toDate = fromDate.plusMonths(1);
             } else {
                 WeekFields weekFields = WeekFields.of(Locale.getDefault());
-                fromDate = LocalDateTime.now().withYear(year)
+                fromDate = LocalDateTime.now()
+                        .withYear(year)
                         .with(weekFields.weekOfYear(), week-1)
                         .with(weekFields.dayOfWeek(), 7);
                 toDate = fromDate.plusWeeks(1);
@@ -92,14 +101,11 @@ public class EntsoeService {
             toDate = fromDate.plusYears(1);
         }
 
-        fromDate = fromDate.withHour(23).withMinute(0).withSecond(0).withNano(0);
-        toDate = toDate.withHour(23).withMinute(0).withSecond(0).withNano(0);
-
-        return Pair.of(formatDate(fromDate), formatDate(toDate));
+        return Pair.of(DateTimeUtils.createEntsoeQueryDateTime(fromDate), DateTimeUtils.createEntsoeQueryDateTime(toDate));
     }
     private Pair<String, String> getDateIntervalByDateRange(String from, String to) {
         to = isNotBlank(to) ? to.trim().substring(0,8) : DateTimeUtils.createLocalDateTimeNow()
-                .format(DateTimeFormatter.BASIC_ISO_DATE);//.concat("2300");
+                .format(DateTimeFormatter.BASIC_ISO_DATE);
 
         LocalDateTime fromDateTime =
                 DateTimeUtils.createLocalDateTimeFromString(from.trim().substring(0,8));
@@ -108,42 +114,37 @@ public class EntsoeService {
                 DateTimeUtils.createLocalDateTimeFromString(to);
 
 
-        return (fromDateTime.isBefore(toDateTime) || fromDateTime.isEqual(toDateTime)) ?
-                Pair.of(formatDate(fromDateTime), formatDate(toDateTime)) :
-                Pair.of(formatDate(toDateTime), formatDate(fromDateTime));
+        return (fromDateTime.toLocalDate().isBefore(toDateTime.toLocalDate()) || fromDateTime.toLocalDate().isEqual(toDateTime.toLocalDate())) ?
+                Pair.of(DateTimeUtils.createEntsoeQueryDateTime(fromDateTime), DateTimeUtils.createEntsoeQueryDateTime(toDateTime)) :
+                Pair.of(DateTimeUtils.createEntsoeQueryDateTime(toDateTime), DateTimeUtils.createEntsoeQueryDateTime(fromDateTime));
     }
     private Pair<String, String> getDateIntervalByInterval(String intervalType, String intervalStr) {
         IntervalType type = IntervalType.valueOf(intervalType);
         int interval = Integer.parseInt(intervalStr);
 
-        LocalDateTime today = LocalDateTime.now()
-                .withHour(23)
-                .withMinute(0)
-                .withSecond(0)
-                .withNano(0);
+        LocalDateTime today = DateTimeUtils.createLocalDateTimeNow();
 
-        boolean isPast =  interval < 0;
-        // Reverse interval from minus to plus
-        int rInterval = interval * -1;
-        String intervalDate = formatDate(switch (type) {
-            case YEAR -> isPast ? today.minusYears(1) : today.plusYears(1);
-            case MONTH -> isPast ? today.minusMonths(Math.min(rInterval, 12)) : today.plusMonths(Math.min(interval, 12));
-            case WEEK -> isPast ? today.minusWeeks(Math.min(rInterval, 53)) : today.plusWeeks(Math.min(interval, 53));
-            case DAY -> isPast ? today.minusDays(Math.min(rInterval, 365)) : today.plusDays(Math.min(interval, 365));
-        });
+        LocalDateTime intervalDate = switch (type) {
+            case YEAR -> today.minusYears(1);
+            case MONTH -> today.minusMonths(Math.min(interval, 12));
+            case WEEK -> today.minusWeeks(Math.min(interval, 53));
+            case DAY -> interval == -1 ? today.plusDays(1) : today.minusDays(Math.min(interval, 365));
+        };
 
-        return isPast ? Pair.of(intervalDate, formatDate(today)) : Pair.of(formatDate(today), intervalDate);
+        return interval != -1 ?
+                Pair.of(DateTimeUtils.createEntsoeQueryDateTime(intervalDate), DateTimeUtils.createEntsoeQueryDateTime(today)) :
+                Pair.of(DateTimeUtils.createEntsoeQueryDateTime(today), DateTimeUtils.createEntsoeQueryDateTime(intervalDate));
     }
-    private String formatDate(LocalDateTime dateTime) {
-        return dateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
-    }
+
     private void prepareDocument(PublicationMarketDocument document, String areaCode) {
         document.setArea(areaCode);
         if(nonNull(document.getTimeSeries()) && !document.getTimeSeries().isEmpty())
             document.getTimeSeries().forEach(s -> s.getPeriod().setPricePointHours());
     }
 
-    private String getDataByPeriod(String securityToken, String areaCode, String start, String end) {
+
+    @Cacheable(value = "pastyear", key = "{#areaCode,#start,#end}")
+    public String getDataByPeriod(String securityToken, String areaCode, String start, String end) {
         return entsoeApiClient.getByPeriodDefinition(securityToken,areaCode,start,end);
     }
 }

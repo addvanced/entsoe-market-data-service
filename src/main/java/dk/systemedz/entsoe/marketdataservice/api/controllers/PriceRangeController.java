@@ -66,7 +66,9 @@ public class PriceRangeController implements PriceRangeControllerApiDelegate {
             return service.
                     getPricesFromEntsoeApi(entsoeSecurityToken.trim(), AreaCode.valueOf(areaCode.name()).getAreaCode(),
                             params, QueryType.DATETIME);
-        }  catch (RuntimeException e) {
+        } catch (RestCallException re){
+            throw new RestCallException("No data provided by ENTSO-E. Try another interval.", HttpStatus.NO_CONTENT);
+        } catch (RuntimeException e) {
             log.error("Error:", e);
             throw new RestCallException("Something went wrong", HttpStatus.BAD_REQUEST, e);
         }
